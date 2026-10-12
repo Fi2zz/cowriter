@@ -59,7 +59,7 @@ Future<HeadlessResult> runHeadless(
     },
   );
   // 故事层：异步（要从 sessionLog 重建），故在插件回调外 await。
-  await provideStory(ctx, sessionId: session.id);
+  await provideStory(ctx, sessionId: session.id, session: session);
   try {
     final AgentTurn turn = await ctx.agentLoop.run(prompt);
     return HeadlessResult(

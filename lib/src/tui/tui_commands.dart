@@ -71,7 +71,8 @@ const List<TuiCommand> tuiCommands = <TuiCommand>[
   TuiCommand(name: 'compact', description: '手动压缩当前会话（折叠早期历史）'),
   TuiCommand(
     name: 'story',
-    description: '故事线：列出本会话的补丁时间轴（人机双写）',
+    description: '故事线（人机双写）：时间轴 / preview / discard / fork / pending / apply',
+    argHint: '[子命令]',
   ),
   TuiCommand(
     name: 'rewind',

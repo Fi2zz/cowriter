@@ -13,6 +13,8 @@ import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 
+import 'story_pending.dart';
+import 'story_render.dart';
 import 'story_watcher.dart';
 
 /// 产生故事补丁的编辑工具。
@@ -23,11 +25,13 @@ const Set<String> kStoryToolNames = <String>{
 };
 
 /// 提供故事层：`'doc'` 服务（[DocEngine]）+ 编辑工具观察中间件 +
-/// 人的编辑监听（轮询 [watchDir]）。
+/// 人的编辑监听（轮询 [watchDir]）+ 待应用补丁通道（[session] 提供时）。
 ///
 /// [sessionId] 是 `doc/*` 事件的会话归属。装配了 `'sessionLog'` 服务时
 /// 先经 [rebuildDocEngine] 从事件流重建（跨重启恢复故事线），否则起新
 /// 内存引擎。[watchDir] 缺省取 `'workdir'` 服务；为 null 时不装监听。
+/// [session] 提供时订阅助手消息，把含 ```` ```ops ```` 块的回复收进
+/// `'storyPending'` 服务（审阅后 `/story apply` 才生效）。
 /// 中间件与监听都随 [ctx] 卸载撤销；登记失败只记 telemetry
 /// （`story.record_failed`），不影响工具调用本身。
 Future<DocEngine> provideStory(
@@ -35,6 +39,7 @@ Future<DocEngine> provideStory(
   required String sessionId,
   String? watchDir,
   Duration pollInterval = const Duration(milliseconds: 500),
+  Session? session,
 }) async {
   final DocEngine engine = await _restoreEngine(ctx, sessionId);
   ctx.provide('doc', engine);
@@ -50,6 +55,9 @@ Future<DocEngine> provideStory(
     watchDir ?? ctx.get<String>('workdir'),
     pollInterval,
   );
+  if (session != null) {
+    ctx.onDispose(bindStoryPending(ctx, session, StoryPending()));
+  }
   return engine;
 }
 
@@ -152,44 +160,4 @@ class StoryRecorder {
       data: <String, Object?>{'message': message},
     ),
   );
-}
-
-/// 取出本次编辑涉及的文件：`write_file` / `edit_file` 在参数里，
-/// `apply_patch`（多文件）在结果的 `files` 里（与 lint 同一取法）。
-List<String> storyEditedPaths(ToolCall call, ToolResult result) {
-  final Object? single = call.arguments['path'];
-  if (single is String && single.isNotEmpty) return <String>[single];
-  final Object? value = result.value;
-  if (value is! Map<String, Object?>) return const <String>[];
-  final Object? files = value['files'];
-  if (files is! List) return const <String>[];
-  return files.whereType<String>().where((String p) => p.isNotEmpty).toList();
-}
-
-/// 渲染补丁时间轴（`/story` 输出）：序号、作者、补丁 id、涉及文件、时间。
-String renderStoryTimeline(List<DocPatch> patches) {
-  if (patches.isEmpty) return '故事线：还没有补丁。';
-  final StringBuffer buffer = StringBuffer('故事线（${patches.length} 个补丁）：');
-  for (final (int index, DocPatch patch) in patches.indexed) {
-    final String author = patch.author == PatchAuthor.ai ? 'AI' : '人';
-    final String files = patch.ops.map((PatchOp op) => op.blockId).join(', ');
-    buffer.write(
-      '\n  ${index + 1}. [$author] ${patch.id}'
-      ' — ${files.isEmpty ? '（无文件）' : files}'
-      '（${storyPatchTime(patch.id)}）',
-    );
-  }
-  return buffer.toString();
-}
-
-/// 从补丁 id（`story-<微秒>-<序号>`）解析落定时间；不可解析时返回 `-`。
-String storyPatchTime(String id) {
-  final List<String> parts = id.split('-');
-  if (parts.length != 3) return '-';
-  final int? micros = int.tryParse(parts[1]);
-  if (micros == null) return '-';
-  final String text = DateTime.fromMicrosecondsSinceEpoch(
-    micros,
-  ).toLocal().toString();
-  return text.substring(0, 19);
 }

@@ -169,14 +169,17 @@ export 'src/sandbox/seatbelt_profile.dart'
         buildSeatbeltProfile,
         defaultWritableCaches,
         seatbeltMachAllowlist;
-export 'src/story/story.dart'
+export 'src/story/story.dart' show StoryRecorder, kStoryToolNames, provideStory;
+export 'src/story/story_commands.dart'
     show
-        StoryRecorder,
-        kStoryToolNames,
-        provideStory,
-        renderStoryTimeline,
-        storyEditedPaths,
-        storyPatchTime;
+        StoryDiscardResult,
+        discardStoryPatch,
+        renderStoryDiscard,
+        renderStoryPreview;
+export 'src/story/story_pending.dart'
+    show StoryPending, bindStoryPending, renderStoryPending, tryCompileOps;
+export 'src/story/story_render.dart'
+    show renderStoryTimeline, storyEditedPaths, storyPatchTime;
 export 'src/story/story_watcher.dart'
     show StoryWatcher, kStorySkipDirs, kStoryTextExtensions;
 export 'src/subagent/subagent_progress.dart'

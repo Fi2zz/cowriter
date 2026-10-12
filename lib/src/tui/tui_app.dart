@@ -496,6 +496,14 @@ class ConatusTuiRuntime {
             '执行中每完成一步用 update_plan 标记进度；工具失败时反思原因并重试或调整方案。',
       ),
     );
+    prompt.section(
+      PromptSection(
+        name: 'story-ops',
+        text: () =>
+            '除了文件工具，你也可以用 ```ops 围栏块（JSON 数组的块操作）提议修改；'
+            '提议不会直接生效，人审阅后才应用。',
+      ),
+    );
     // 项目上下文：AGENTS.md / NAVA.md（见 project_context.dart）。注入为
     // `'workdir'` 服务供 `/init` 等命令定位仓库根。
     app.provide('workdir', resolvedWorkdir);
