@@ -4,15 +4,20 @@ library;
 import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 
-/// 预览 [state]（`/story preview <n>`）：逐块列出，每块最多 [maxLines] 行。
+import 'story_blocks.dart';
+
+/// 预览 [state]（`/story preview <n>`）：段落块按文件重组后逐文件列出，
+/// 每文件最多 [maxLines] 行。
 String renderStoryPreview(DocumentState state, {int maxLines = 10}) {
   if (state.blocks.isEmpty) return '该时刻文档为空。';
-  final StringBuffer buffer = StringBuffer(
-    '该时刻文档（${state.blocks.length} 个文件）：',
-  );
+  final Map<String, List<DocBlock>> grouped = <String, List<DocBlock>>{};
   for (final DocBlock block in state.blocks) {
-    final List<String> lines = block.text.split('\n');
-    buffer.write('\n── ${block.id} ──\n');
+    grouped.putIfAbsent(pathOfBlock(block.id), () => <DocBlock>[]).add(block);
+  }
+  final StringBuffer buffer = StringBuffer('该时刻文档（${grouped.length} 个文件）：');
+  for (final MapEntry<String, List<DocBlock>> entry in grouped.entries) {
+    final List<String> lines = renderFileText(entry.value).split('\n');
+    buffer.write('\n── ${entry.key} ──\n');
     buffer.write(lines.take(maxLines).join('\n'));
     if (lines.length > maxLines) buffer.write('\n…（共 ${lines.length} 行）');
   }
@@ -54,8 +59,9 @@ Future<StoryDiscardResult> discardStoryPatch(
     throw ArgumentError.value(index, 'index', '补丁序号越界（/story 查看时间轴）');
   }
   final DocPatch patch = patches[index - 1];
+  // 块 id 是 `path#hash`（段落粒度）或旧形态整路径——统一映射回文件路径。
   final Set<String> touched = <String>{
-    for (final PatchOp op in patch.ops) op.blockId,
+    for (final PatchOp op in patch.ops) pathOfBlock(op.blockId),
   };
   await engine.discard(patch.id);
   return _writeBack(engine, fs, patch.id, touched);
@@ -72,13 +78,13 @@ Future<StoryDiscardResult> _writeBack(
   final List<String> written = <String>[];
   final List<String> kept = <String>[];
   for (final String path in touched) {
-    final int at = indexOfBlock(state.blocks, path);
-    if (at < 0) {
+    final List<DocBlock> blocks = blocksOfFile(state, path);
+    if (blocks.isEmpty) {
       kept.add(path);
       continue;
     }
     if (fs == null) continue;
-    await fs.writeText(await fs.resolve(path), state.blocks[at].text);
+    await fs.writeText(await fs.resolve(path), renderFileText(blocks));
     written.add(path);
   }
   return StoryDiscardResult(patchId: patchId, written: written, kept: kept);

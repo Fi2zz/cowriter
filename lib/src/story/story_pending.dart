@@ -12,6 +12,7 @@ import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 
 import 'story_conflict.dart';
+import 'story_sync.dart';
 
 /// 编译助手文本里的 ops 块；无块或编译失败（普通回复里自然出现的
 /// ```` ``` ```` 块）都返回空——绝不因此炸会话。
@@ -107,21 +108,26 @@ class StoryPending {
     FileSystem fs,
   ) async {
     final Map<String, String?>? bases = _bases[patch.id];
-    final List<PatchOp> landed = <PatchOp>[];
+    // 落盘文本按文件收集；commit 的 ops 用「apply 前 fold → 落盘后内容」
+    // 经段落同步器生成（冲突合并文本同路）。引擎状态在 commit 前不变，
+    // 人期间改的段落已是 fold 的一部分，sync 只补 AI 落盘的增量。
+    final Map<String, String> landedText = <String, String>{};
     int conflicts = 0;
     for (final PatchOp op in patch.ops) {
-      final bool blockExists =
-          indexOfBlock(engine.state.blocks, op.blockId) >= 0;
-      final ({PatchOp op, bool conflicted}) result = await applyPendingOp(
+      final ({String text, bool conflicted}) result = await applyPendingOp(
         fs,
         op,
         bases,
         index,
-        blockExists: blockExists,
       );
-      landed.add(result.op);
+      landedText[op.blockId] = result.text;
       if (result.conflicted) conflicts++;
     }
+    final DocumentState before = engine.state;
+    final List<PatchOp> landed = <PatchOp>[
+      for (final MapEntry<String, String> entry in landedText.entries)
+        ...syncFileOps(state: before, path: entry.key, newText: entry.value),
+    ];
     final DocPatch removed = _patches.removeAt(index - 1);
     _sources.remove(removed.id);
     _bases.remove(removed.id);

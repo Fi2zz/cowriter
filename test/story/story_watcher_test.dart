@@ -86,8 +86,15 @@ void main() {
       expect(engine.log.length, 2);
       final DocPatch patch = engine.log.patches[1];
       expect(patch.author, PatchAuthor.human);
-      expect(patch.ops.single, isA<ReplaceBlockOp>());
-      expect(engine.state.blocks.single.text, 'AI 初稿 + 人改写的一段');
+      // 段落粒度：人改一段 = 该段 remove + insert（不虚构成 replace）。
+      expect(
+        patch.ops.map((PatchOp o) => o.runtimeType),
+        containsAll(<Type>[RemoveBlockOp, InsertBlockOp]),
+      );
+      expect(
+        renderFileText(blocksOfFile(engine.state, 'a.md')),
+        'AI 初稿 + 人改写的一段',
+      );
     });
 
     test('同一路径连续改动合并为一个 op；多文件合成一个补丁', () async {
@@ -104,10 +111,7 @@ void main() {
       expect(engine.log.length, 1);
       final DocPatch patch = engine.log.patches.single;
       expect(patch.ops.length, 2);
-      expect(
-        engine.state.blocks.firstWhere((DocBlock b) => b.id == 'a.md').text,
-        '第一版，加一句',
-      );
+      expect(renderFileText(blocksOfFile(engine.state, 'a.md')), '第一版，加一句');
     });
 
     test('跳过集目录与无改动不产生补丁', () async {

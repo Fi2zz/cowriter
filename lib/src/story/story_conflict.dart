@@ -27,17 +27,16 @@ String mergeConflictVersions({
   return '$kConflictOpen\n$ours$kConflictSplit\n$theirs${conflictClose(index)}\n';
 }
 
-/// 应用单个待定 op：磁盘内容 == 基底 → 干净写入（op 原样）；不等 → 冲突，
-/// 写双版本合并文本，落故事的 op 带实际落盘文本（故事与磁盘一致）。
-/// [bases] 缺失该文件的记录时退化为直接写（旧数据兼容）。
-Future<({PatchOp op, bool conflicted})> applyPendingOp(
+/// 应用单个待定 op：磁盘内容 == 基底 → 干净写入；不等 → 冲突，写双版本
+/// 合并文本。返回实际落盘文本（落故事的段落 ops 由调用方按它生成——
+/// 故事与磁盘一致）。[bases] 缺失该文件的记录时退化为直接写（旧数据兼容）。
+Future<({String text, bool conflicted})> applyPendingOp(
   FileSystem fs,
   PatchOp op,
   Map<String, String?>? bases,
-  int index, {
-  required bool blockExists,
-}) async {
-  final String text = _opText(op);
+  int index,
+) async {
+  final String text = pendingOpText(op);
   final String? base = bases == null ? null : bases[op.blockId];
   final bool tracked = bases != null && bases.containsKey(op.blockId);
   final String? current = await _readOrNull(fs, op.blockId);
@@ -50,21 +49,14 @@ Future<({PatchOp op, bool conflicted})> applyPendingOp(
           index: index,
         );
   await fs.writeText(await fs.resolve(op.blockId), landed);
-  return (op: _landedOp(op, landed, blockExists), conflicted: !clean);
+  return (text: landed, conflicted: !clean);
 }
 
-String _opText(PatchOp op) {
+/// 待定 op 的目标全文（v1 只有 Insert / Replace 能进 apply 路径）。
+String pendingOpText(PatchOp op) {
   if (op is InsertBlockOp) return op.text;
   if (op is ReplaceBlockOp) return op.text;
   return '';
-}
-
-/// 冲突落盘后引擎里该块已存在则用 Replace（Insert 同 id 会产生重复块）。
-PatchOp _landedOp(PatchOp op, String landed, bool blockExists) {
-  if (op is InsertBlockOp && !blockExists) {
-    return InsertBlockOp(blockId: op.blockId, text: landed);
-  }
-  return ReplaceBlockOp(blockId: op.blockId, text: landed);
 }
 
 /// 记录提出时的基底：每个目标文件的当前内容（null = 当时不存在）；

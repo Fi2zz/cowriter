@@ -4,6 +4,8 @@ library;
 import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 
+import 'story_blocks.dart';
+
 /// 取出本次编辑涉及的文件：`write_file` / `edit_file` 在参数里，
 /// `apply_patch`（多文件）在结果的 `files` 里（与 lint 同一取法）。
 List<String> storyEditedPaths(ToolCall call, ToolResult result) {
@@ -22,7 +24,7 @@ String renderStoryTimeline(List<DocPatch> patches) {
   final StringBuffer buffer = StringBuffer('故事线（${patches.length} 个补丁）：');
   for (final (int index, DocPatch patch) in patches.indexed) {
     final String author = patch.author == PatchAuthor.ai ? 'AI' : '人';
-    final String files = patch.ops.map((PatchOp op) => op.blockId).join(', ');
+    final String files = patch.ops.map(storyOpLabel).join('、');
     buffer.write(
       '\n  ${index + 1}. [$author] ${patch.id}'
       ' — ${files.isEmpty ? '（无文件）' : files}'
@@ -43,4 +45,15 @@ String storyPatchTime(String id) {
     micros,
   ).toLocal().toString();
   return text.substring(0, 19);
+}
+
+/// 单个 op 的展示标签：路径 + 段落摘要（首 20 字）；删除段标注（删）。
+/// 块 id 的 hash 部分不外露（它只是身份，不是内容）。
+String storyOpLabel(PatchOp op) {
+  final String path = pathOfBlock(op.blockId);
+  final String? text = opTextOf(op);
+  if (text == null) return '$path（删）';
+  final String brief = text.trim().replaceAll('\n', ' ');
+  if (brief.length <= 20) return '$path「$brief」';
+  return '$path「${brief.substring(0, 20)}…」';
 }

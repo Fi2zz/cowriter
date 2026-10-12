@@ -84,7 +84,8 @@ void main() {
       expect(patch.author, PatchAuthor.ai);
       expect(patch.ops.single, isA<InsertBlockOp>());
       expect((await _docEvents(log)).length, 1);
-      expect(engine.state.blocks.single.id, 'a.md');
+      // 段落粒度：块 id 是 `路径#hash` 形态。
+      expect(engine.state.blocks.single.id, startsWith('a.md#'));
       expect(engine.state.blocks.single.text, '你好');
     });
 
@@ -114,7 +115,12 @@ void main() {
 
       expect(result.isError, isFalse);
       expect(engine.log.length, 2);
-      expect(engine.log.patches[1].ops.single, isA<ReplaceBlockOp>());
+      // 段落粒度：修改 = 旧段 remove + 新段 insert（不虚构成 replace）。
+      final List<PatchOp> ops = engine.log.patches[1].ops;
+      expect(
+        ops.map((PatchOp o) => o.runtimeType),
+        containsAll(<Type>[RemoveBlockOp, InsertBlockOp]),
+      );
       expect(engine.log.patches[1].author, PatchAuthor.ai);
       expect(engine.state.blocks.single.text, '新文');
     });
@@ -151,7 +157,7 @@ void main() {
       expect(engine.log.length, 1);
       expect(engine.log.patches.single.ops.length, 2);
       expect(
-        engine.state.blocks.map((DocBlock b) => b.id),
+        engine.state.blocks.map((DocBlock b) => pathOfBlock(b.id)),
         containsAll(<String>['a.txt', 'b.txt']),
       );
     });

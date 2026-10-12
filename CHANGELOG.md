@@ -4,6 +4,13 @@
 
 ## [未发布]
 
+- **故事层块粒度细化到段落**：入故事的 DocPatch ops 由段落同步器
+  （`story_sync.dart`，段落按空行切分、LCS 对齐、修改 = remove + insert
+  如实记录）生成；块 id 为 `路径#<sha1 前 8>`（重复段 `-2` 后缀去重，
+  超 512 段退化 `路径#full` 单块）。三条通道（AI 工具编辑 / watcher 人的
+  编辑 / pending apply）统一接入；/story 时间轴与 preview 按「路径 +
+  段落摘要」显示。pending/apply/冲突的写盘路径不变（仍整文件落盘）。
+  旧会话的文件粒度块共存不迁移。
 - **apply 冲突双版本**：pending 登记时记录每个目标文件的基底内容；
   apply 时磁盘 ≠ 基底即冲突——git 式 marker 双版本落盘（人的版本在上、
   AI 待定内容在下），不覆盖不静默失败；落故事的 op 带实际落盘文本

@@ -17,6 +17,7 @@ import 'story_notices.dart';
 import 'story_pending.dart';
 import 'story_render.dart';
 import 'story_review.dart';
+import 'story_sync.dart';
 import 'story_watcher.dart';
 
 /// 产生故事补丁的编辑工具。
@@ -140,12 +141,13 @@ class StoryRecorder {
     return result;
   }
 
-  /// 按本次调用涉及的路径组装一个补丁并提交。
+  /// 按本次调用涉及的路径组装一个补丁并提交（ops 为段落级，见
+  /// story_sync.dart）。
   Future<void> record(ToolCall call, ToolResult result) async {
     final List<String> paths = storyEditedPaths(call, result);
     if (paths.isEmpty) return;
     final List<PatchOp> ops = <PatchOp>[
-      for (final String path in paths) await _opFor(path),
+      for (final String path in paths) ...await _opsForFile(path),
     ];
     _seq += 1;
     await engine.commit(
@@ -157,12 +159,16 @@ class StoryRecorder {
     );
   }
 
-  /// 单个文件的 op：引擎里已有该块则 Replace，否则 Insert。
-  Future<PatchOp> _opFor(String path) async {
+  /// 单个文件的段落级 ops：读回新内容与 fold 状态对齐（段落同步器）。
+  Future<List<PatchOp>> _opsForFile(String path) async {
     final String text = await _readBack(path);
-    final bool recorded = indexOfBlock(engine.state.blocks, path) >= 0;
-    if (recorded) return ReplaceBlockOp(blockId: path, text: text);
-    return InsertBlockOp(blockId: path, text: text);
+    try {
+      return syncFileOps(state: engine.state, path: path, newText: text);
+    } catch (error) {
+      // fail-safe：同步器异常不炸工具调用，退化为整块 op。
+      _warn('段落同步失败（$path）：$error');
+      return wholeFileOps(state: engine.state, path: path, newText: text);
+    }
   }
 
   /// 经 fs 缝读回新内容；失败降级为空串并告警（补丁不丢，内容稍后可重建）。

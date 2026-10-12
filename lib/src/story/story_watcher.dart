@@ -16,8 +16,10 @@ import 'dart:io';
 import 'package:conatus_agent/conatus_agent.dart';
 import 'package:conatus_doc/conatus_doc.dart';
 
+import 'story_blocks.dart';
 import 'story_notices.dart';
 import 'story_scan.dart';
+import 'story_sync.dart';
 
 /// 工作目录轮询器：把人的文件改动登记为 `PatchAuthor.human` 补丁。
 ///
@@ -74,9 +76,8 @@ class StoryWatcher {
       _mtimes.addAll(now);
       return;
     }
-    final List<({PatchOp op, int added, int removed})> changes = await _diffOps(
-      now,
-    );
+    final List<({List<PatchOp> ops, String path, int added, int removed})>
+    changes = await _diffOps(now);
     _mtimes
       ..clear()
       ..addAll(now);
@@ -86,23 +87,22 @@ class StoryWatcher {
       DocPatch(
         id: 'human-${DateTime.now().microsecondsSinceEpoch}-$_seq',
         author: PatchAuthor.human,
-        ops: <PatchOp>[for (final c in changes) c.op],
+        ops: <PatchOp>[for (final c in changes) ...c.ops],
       ),
     );
     notices?.add(
       renderEditNotice(<StoryFileChange>[
         for (final c in changes)
-          (path: c.op.blockId, added: c.added, removed: c.removed),
+          (path: c.path, added: c.added, removed: c.removed),
       ]),
     );
   }
 
   /// 与基线对比：mtime 变新的文件逐个读回归因，返回本批变化。
-  Future<List<({PatchOp op, int added, int removed})>> _diffOps(
-    Map<String, (DateTime, int)> now,
-  ) async {
-    final List<({PatchOp op, int added, int removed})> out =
-        <({PatchOp op, int added, int removed})>[];
+  Future<List<({List<PatchOp> ops, String path, int added, int removed})>>
+  _diffOps(Map<String, (DateTime, int)> now) async {
+    final List<({List<PatchOp> ops, String path, int added, int removed})> out =
+        <({List<PatchOp> ops, String path, int added, int removed})>[];
     for (final MapEntry<String, (DateTime, int)> entry in now.entries) {
       final (DateTime, int)? before = _mtimes[entry.key];
       final bool unchanged = before != null && before == entry.value;
@@ -113,28 +113,23 @@ class StoryWatcher {
     return out;
   }
 
-  /// 内容归因：与引擎状态一致 = AI 自己写的（跳过）；块不存在 = 人新建
-  /// （Insert）；不一致 = 人修改（Replace）。读回失败（非文本等）跳过。
-  /// 返回 op 与行级变化（通报用）。
-  Future<({PatchOp op, int added, int removed})?> _attributeOp(
-    String path,
-  ) async {
+  /// 内容归因：磁盘内容与引擎 fold（段落重建）一致 = AI 自己写的（跳过）；
+  /// 不一致 = 人改的，生成段落级 ops（段落同步器；通报行数仍按行级
+  /// diffLines）。读回失败（非文本等）跳过。双方经 normalizeParagraphText
+  /// 规范化再比（split/render 往返会归一多余空行）。
+  Future<({List<PatchOp> ops, String path, int added, int removed})?>
+  _attributeOp(String path) async {
     final String? text = await _readText(path);
     if (text == null) return null;
-    final List<DocBlock> blocks = engine.state.blocks;
-    final int at = indexOfBlock(blocks, path);
-    if (at < 0) {
-      final ({int added, int removed}) diff = diffLines('', text);
-      return (
-        op: InsertBlockOp(blockId: path, text: text),
-        added: diff.added,
-        removed: diff.removed,
-      );
+    final DocumentState state = engine.state;
+    final String oldText = renderFileText(blocksOfFile(state, path));
+    if (normalizeParagraphText(oldText) == normalizeParagraphText(text)) {
+      return null;
     }
-    if (blocks[at].text == text) return null;
-    final ({int added, int removed}) diff = diffLines(blocks[at].text, text);
+    final ({int added, int removed}) diff = diffLines(oldText, text);
     return (
-      op: ReplaceBlockOp(blockId: path, text: text),
+      ops: syncFileOps(state: state, path: path, newText: text),
+      path: path,
       added: diff.added,
       removed: diff.removed,
     );

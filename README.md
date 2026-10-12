@@ -180,8 +180,10 @@ busy 时输入框保持可编辑（「思考中」动画在状态栏）：回车
 
 基于 conatus_doc 的文档补丁引擎，把文件编辑映射为补丁：**一次成功的
 `write_file` / `edit_file` / `apply_patch` = 一个补丁**（`author: ai`，
-`apply_patch` 多文件时一个补丁含多个 op）；块 = 文件的薄映射，块 id 即文件
-相对路径。失败的工具调用不记；读回新内容失败时降级为空文本并记 telemetry
+`apply_patch` 多文件时一个补丁含多个 op）；块 = **段落**（按空行切段，
+块 id = `路径#<sha1 前 8>`，旧会话的文件粒度块共存不迁移），入故事的
+ops 由段落同步器按 LCS 对齐生成（修改 = 旧段 remove + 新段 insert）。
+失败的工具调用不记；读回新内容失败时降级为空文本并记 telemetry
 （`story.record_failed`），不影响工具调用本身。
 
 - `/story`：列出本会话的补丁时间轴——序号、作者（人/AI）、补丁 id、涉及

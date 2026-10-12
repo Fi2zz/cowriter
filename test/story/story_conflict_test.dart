@@ -55,8 +55,13 @@ void main() {
       expect(landed, contains(conflictClose(1)));
       // 人的版本在上、AI 版本在下，内容完整。
       expect(landed.indexOf('人的编辑'), lessThan(landed.indexOf('AI 待定内容')));
-      // 落故事的 op 带实际落盘文本（故事与磁盘一致）。
-      expect(engine.state.blocks.single.text, landed);
+      // 落故事的 ops 按实际落盘文本段落化（规范化后与磁盘一致）。
+      expect(
+        normalizeParagraphText(
+          renderFileText(blocksOfFile(engine.state, 'a.md')),
+        ),
+        normalizeParagraphText(landed),
+      );
       // 冲突补丁在时间轴可见。
       expect(renderStoryTimeline(engine.log.patches), contains('a.md'));
     });

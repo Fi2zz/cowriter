@@ -172,6 +172,16 @@ export 'src/sandbox/seatbelt_profile.dart'
         defaultWritableCaches,
         seatbeltMachAllowlist;
 export 'src/story/story.dart' show StoryRecorder, kStoryToolNames, provideStory;
+export 'src/story/story_blocks.dart'
+    show
+        blockBelongsTo,
+        blocksOfFile,
+        normalizeParagraphText,
+        opTextOf,
+        paragraphBlockId,
+        pathOfBlock,
+        renderFileText,
+        splitParagraphs;
 export 'src/story/story_commands.dart'
     show
         StoryDiscardResult,
@@ -191,9 +201,16 @@ export 'src/story/story_notices.dart'
 export 'src/story/story_pending.dart'
     show StoryPending, bindStoryPending, renderStoryPending, tryCompileOps;
 export 'src/story/story_render.dart'
-    show renderStoryTimeline, storyEditedPaths, storyPatchTime;
+    show renderStoryTimeline, storyEditedPaths, storyOpLabel, storyPatchTime;
 export 'src/story/story_review.dart' show StoryReviewGate, previewEditedOps;
 export 'src/story/story_scan.dart' show kStorySkipDirs, kStoryTextExtensions;
+export 'src/story/story_sync.dart'
+    show
+        anchorForNewFile,
+        buildSyncOps,
+        kParagraphLimit,
+        syncFileOps,
+        wholeFileOps;
 export 'src/story/story_watcher.dart' show StoryWatcher;
 export 'src/subagent/subagent_progress.dart'
     show SubAgentLine, SubAgentProgressStore;
