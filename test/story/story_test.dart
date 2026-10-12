@@ -47,7 +47,7 @@ Future<(Context, DocEngine, InMemorySessionLog, Directory)> _build() async {
   app.effect(() => app.tools.register(ApplyPatchTool(fs: fs)));
   final InMemorySessionLog log = InMemorySessionLog();
   provideSessionLog(app, log: log);
-  final DocEngine engine = provideStory(app, sessionId: 's1');
+  final DocEngine engine = await provideStory(app, sessionId: 's1');
   return (app, engine, log, dir);
 }
 

@@ -1703,12 +1703,13 @@ class ConatusTuiController implements TuiUserPromptHost {
         telemetry: _app.get<Telemetry>('telemetry'),
       );
       provideTeamTools(child);
-      // 故事层：本会话的编辑补丁引擎（doc 服务）+ 编辑工具观察中间件，
-      // 随会话子上下文卸载撤销。
-      provideStory(child, sessionId: id);
       configureSession?.call(child, session);
     });
     _sessionCtx = ctx;
+    // 故事层：本会话的编辑补丁引擎（doc 服务）+ 编辑观察中间件 + 人的编辑
+    // 监听，随会话子上下文卸载撤销。异步（要从 sessionLog 重建故事线），
+    // 故在插件回调外 await。
+    await provideStory(ctx, sessionId: id);
     _agent = ctx.agentLoop;
     _planMode = ctx.planMode;
     _goal = ctx.goal;

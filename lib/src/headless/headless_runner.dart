@@ -56,9 +56,10 @@ Future<HeadlessResult> runHeadless(
     'headless:${session.id}',
     (Context child) {
       provideAgentLoop(child, session: session, maxSteps: runtime.maxSteps);
-      provideStory(child, sessionId: session.id);
     },
   );
+  // 故事层：异步（要从 sessionLog 重建），故在插件回调外 await。
+  await provideStory(ctx, sessionId: session.id);
   try {
     final AgentTurn turn = await ctx.agentLoop.run(prompt);
     return HeadlessResult(

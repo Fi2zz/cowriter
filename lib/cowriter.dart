@@ -177,6 +177,8 @@ export 'src/story/story.dart'
         renderStoryTimeline,
         storyEditedPaths,
         storyPatchTime;
+export 'src/story/story_watcher.dart'
+    show StoryWatcher, kStorySkipDirs, kStoryTextExtensions;
 export 'src/subagent/subagent_progress.dart'
     show SubAgentLine, SubAgentProgressStore;
 export 'src/subagent/swarm_member.dart'

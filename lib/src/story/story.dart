@@ -6,10 +6,14 @@
 /// 同步落 `doc/patch` 会话事件，否则为纯内存故事线。
 library;
 
+import 'dart:async';
+
 import 'package:conatus_agent/conatus_agent.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+
+import 'story_watcher.dart';
 
 /// 产生故事补丁的编辑工具。
 const Set<String> kStoryToolNames = <String>{
@@ -18,19 +22,60 @@ const Set<String> kStoryToolNames = <String>{
   'apply_patch',
 };
 
-/// 提供故事层：`'doc'` 服务（[DocEngine]）+ 编辑工具观察中间件。
+/// 提供故事层：`'doc'` 服务（[DocEngine]）+ 编辑工具观察中间件 +
+/// 人的编辑监听（轮询 [watchDir]）。
 ///
-/// [sessionId] 是 `doc/*` 事件的会话归属。中间件随 [ctx] 卸载撤销；
-/// 登记失败只记 telemetry（`story.record_failed`），不影响工具调用本身。
-DocEngine provideStory(Context ctx, {required String sessionId}) {
-  final DocEngine engine = provideDoc(ctx, sessionId: sessionId);
+/// [sessionId] 是 `doc/*` 事件的会话归属。装配了 `'sessionLog'` 服务时
+/// 先经 [rebuildDocEngine] 从事件流重建（跨重启恢复故事线），否则起新
+/// 内存引擎。[watchDir] 缺省取 `'workdir'` 服务；为 null 时不装监听。
+/// 中间件与监听都随 [ctx] 卸载撤销；登记失败只记 telemetry
+/// （`story.record_failed`），不影响工具调用本身。
+Future<DocEngine> provideStory(
+  Context ctx, {
+  required String sessionId,
+  String? watchDir,
+  Duration pollInterval = const Duration(milliseconds: 500),
+}) async {
+  final DocEngine engine = await _restoreEngine(ctx, sessionId);
+  ctx.provide('doc', engine);
   final StoryRecorder recorder = StoryRecorder(
     engine: engine,
     fs: ctx.get<FileSystem>('fs'),
     telemetry: ctx.get<Telemetry>('telemetry'),
   );
   ctx.effect(() => ctx.tools.use(recorder.observe, tag: 'story'));
+  _startWatcher(
+    ctx,
+    engine,
+    watchDir ?? ctx.get<String>('workdir'),
+    pollInterval,
+  );
   return engine;
+}
+
+/// 恢复引擎：有 `'sessionLog'` 从事件流重建（含 fork 切点映射），没有则
+/// 起纯内存引擎（不落事件）。
+Future<DocEngine> _restoreEngine(Context ctx, String sessionId) async {
+  final SessionLog? log = ctx.get<SessionLog>('sessionLog');
+  if (log == null) return DocEngine(PatchLog(), sessionId: sessionId);
+  return rebuildDocEngine(log, sessionId);
+}
+
+/// 装工作目录监听：轮询间隔即防抖窗；首个 interval 用于建基线。
+void _startWatcher(
+  Context ctx,
+  DocEngine engine,
+  String? watchDir,
+  Duration interval,
+) {
+  if (watchDir == null) return;
+  final StoryWatcher watcher = StoryWatcher(
+    engine: engine,
+    dir: watchDir,
+    telemetry: ctx.get<Telemetry>('telemetry'),
+  );
+  ctx.interval(() => unawaited(watcher.scanOnce()), interval);
+  ctx.onDispose(watcher.dispose);
 }
 
 /// 把成功的编辑工具调用落成补丁（每个变动文件一个 op，整次调用一个补丁）。
