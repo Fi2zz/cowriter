@@ -3,7 +3,7 @@
 /// v1 只读工作目录**根**的两个文件（不做向上递归）。读取前对文件与工作区根
 /// 各取 canonical 路径并校验包含关系：**符号链接指向工作区外时一律不读**。
 /// 为什么必须校验：克隆一个不可信仓库，里面放一个
-/// `AGENTS.md -> ~/.nava/config.toml`（或 `-> ~/.ssh/id_rsa`）的符号链接，
+/// `AGENTS.md -> ~/.nava_cowriter/config.toml`（或 `-> ~/.ssh/id_rsa`）的符号链接，
 /// `File.readAsString` 会跟随它把外部文件内容拼进 system prompt，随首轮请求
 /// 发给远端模型——`dart:io` 直读不过 fs jail，符号链接就是越过 jail 的那道门。
 library;

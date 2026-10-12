@@ -15,7 +15,7 @@ export 'config_values.dart' show ConfigException;
 
 /// 首次启动写入的配置模板（文件不存在时由 [loadConfig] 初始化）。
 const String kDefaultConfigToml = '''
-# nava 的唯一配置入口（~/.nava/config.toml）
+# nava 的唯一配置入口（~/.nava_cowriter/config.toml）
 # 兼容 kimi-code-config 格式：顶层 default_model（provider/model）定当前提供商
 # 与默认模型；模型定义放 [models."provider/model"]；提供商放 [providers.<名字>]。
 
@@ -95,7 +95,7 @@ max_turn_tokens = 200000
 
 /// 加载配置。
 ///
-/// [path] 缺省按 [resolveConfigPath] 定位（`~/.nava/config.toml`）。
+/// [path] 缺省按 [resolveConfigPath] 定位（`~/.nava_cowriter/config.toml`）。
 /// **文件不存在时先写入 [kDefaultConfigToml] 模板**（首次启动初始化），再照常
 /// 解析；文件存在但语法或类型不合法时抛 [ConfigException]，**不静默降级**。
 ///
@@ -105,7 +105,7 @@ ConatusCodeConfig loadConfig({String? path, Map<String, String>? env}) {
   final File source = File(file);
   if (!source.existsSync()) {
     // 走 writer 而不是直接写：它会 chmod 600。裸 writeAsStringSync 是 0644，
-    // 模板里就含 API Key 的位置——本机 ~/.nava/config.toml 一直是这样。
+    // 模板里就含 API Key 的位置——本机 ~/.nava_cowriter/config.toml 一直是这样。
     writeConfigFile(file, kDefaultConfigToml);
   }
   return ConfigParser(decodeToml(source), file).parse();

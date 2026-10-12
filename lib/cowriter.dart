@@ -119,7 +119,7 @@ export 'src/diff/preview.dart' show buildApprovalPreview, kPreviewMaxChars;
 export 'src/diff/unified_diff.dart'
     show buildUnifiedDiff, kMaxDiffLines, splitLines;
 export 'src/fs_tools/spill_dir.dart'
-    show kNavaProjectDirName, toolResultSpillDir;
+    show kCowriterProjectDirName, toolResultSpillDir;
 export 'src/headless/headless_guard.dart'
     show
         approvalModeIgnoredNotice,

@@ -78,7 +78,7 @@ void main() {
     test('HOME 下的路径缩写成 ~', () async {
       final String? home = Platform.environment['HOME'];
       if (home == null) return; // 无 HOME 环境下跳过这条。
-      final Directory under = Directory('$home/.nava-test-tmp')
+      final Directory under = Directory('$home/.nava_cowriter-test-tmp')
         ..createSync(recursive: true);
       addTearDown(() => under.deleteSync(recursive: true));
 

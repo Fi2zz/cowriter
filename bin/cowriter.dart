@@ -55,7 +55,7 @@ Future<void> main(List<String> args) async {
   final String workdir = config.agent.workdir ?? Directory.current.path;
   final String sep = Platform.pathSeparator;
 
-  // 项目数据目录：缺省在 ~/.nava/projects/<编码工作区路径>（不污染工作区）；
+  // 项目数据目录：缺省在 ~/.nava_cowriter/projects/<编码工作区路径>（不污染工作区）；
   // 显式 [agent] project_dir 时才相对工作区。
   final String projectDataDir = resolveProjectDataDir(
     workdir: workdir,

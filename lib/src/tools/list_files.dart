@@ -24,7 +24,7 @@ class ListFilesTool extends Tool {
 
   /// 递归时跳过的目录（按 basename），与 [GlobTool] 保持一致。
   static const Set<String> _skipDirs =
-      <String>{'.git', '.cowriter', 'node_modules', '.dart_tool', 'build'};
+      <String>{'.git', '.nava_cowriter', 'node_modules', '.dart_tool', 'build'};
 
   @override
   String get name => 'list_files';

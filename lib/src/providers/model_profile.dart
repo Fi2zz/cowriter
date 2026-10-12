@@ -74,7 +74,7 @@ class ModelProfileStore {
   ModelProfileStore({ModelsDevClient? client, this.cachePath})
       : _client = client ?? ModelsDevClient(cachePath: cachePath);
 
-  /// models.dev 缓存文件路径（通常是 `~/.nava/models.dev.json`）。
+  /// models.dev 缓存文件路径（通常是 `~/.nava_cowriter/models.dev.json`）。
   final String? cachePath;
 
   final ModelsDevClient _client;

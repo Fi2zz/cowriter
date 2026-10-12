@@ -399,7 +399,7 @@ extension _ProviderCommands on ConatusTuiController {
         registry, name, model: models.isEmpty ? null : models.first.id));
   }
 
-  /// models.dev 缓存放 config 同目录（如 `~/.nava/models.dev.json`）。
+  /// models.dev 缓存放 config 同目录（如 `~/.nava_cowriter/models.dev.json`）。
   String? _modelsDevCache() {
     final String? path = _app.get<String>('configPath');
     if (path == null) {

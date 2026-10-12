@@ -155,7 +155,7 @@ config.toml 的 `[mcp.servers.*]`——形状等价但格式不同。支持直�
 
 ```toml
 [hooks]
-pre_tool_use = ["node ~/.nava/hooks/check-env.cjs"]
+pre_tool_use = ["node ~/.nava_cowriter/hooks/check-env.cjs"]
 post_tool_use = []
 stop = []
 ```
@@ -177,7 +177,7 @@ Claude Code 的 `settings.json` hooks 是带 matcher 的结构化 JSON，与 nav
 插件作者完全无感。用官方 SDK 一个文件就够：
 
 ```js
-// ~/.nava/wrappers/thing/server.mjs
+// ~/.nava_cowriter/wrappers/thing/server.mjs
 // 依赖：npm i @modelcontextprotocol/sdk some-js-library
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/internals/stdio.js";
@@ -203,7 +203,7 @@ config 里指向这个壳：
 [mcp.servers.thing]
 type = "stdio"
 command = "node"
-args = ["/home/you/.nava/wrappers/thing/server.mjs"]
+args = ["/home/you/.nava_cowriter/wrappers/thing/server.mjs"]
 ```
 
 适配壳是一次性成本，在你这边；对 nava 来说它只是一个普通的 MCP server。

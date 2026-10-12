@@ -104,7 +104,7 @@ class ConatusTuiRuntime {
   /// 装配一个默认运行时。
   ///
   /// [sessionDir] / [memoryFile] / cron 任务与运行历史缺省落在 [baseDir]
-  /// （缺省 `$NAVA_HOME/projects/<编码工作区路径>`，即 `~/.nava/...`，不在工作区
+  /// （缺省 `$COWRITER_HOME/projects/<编码工作区路径>`，即 `~/.nava_cowriter/...`，不在工作区
   /// 内）下；[webTools] 为 true 时按 `kDefaultSearchOrder`
   /// 装配搜索源（缺 Key 的自动跳过，见 `conatus_search`）；[skills] 为 true 时
   /// 从 `.conatus/skills` 等目录
@@ -506,7 +506,7 @@ class ConatusTuiRuntime {
       );
     }
     // 检查点：每轮收口后快照工作区（见 checkpoint_manager.dart）。数据目录
-    // 取 baseDir（缺省 ~/.nava/projects/<编码工作区>，不在工作区内），快照/
+    // 取 baseDir（缺省 ~/.nava_cowriter/projects/<编码工作区>，不在工作区内），快照/
     // 恢复走 dart:io 直连。
     if (checkpoint != null) {
       app.provide(
@@ -623,7 +623,7 @@ class ConatusTuiRuntime {
     return '未配置（设置 ARK_API_KEY / DEEPSEEK_API_KEY）';
   }
 
-  /// models.dev 缓存放 config 同目录（如 `~/.nava/models.dev.json`）。
+  /// models.dev 缓存放 config 同目录（如 `~/.nava_cowriter/models.dev.json`）。
   static String? _modelsDevCachePath(String? configPath) {
     if (configPath == null) return null;
     final File file = File(configPath);
@@ -642,7 +642,7 @@ class _UnconfiguredProvider implements LlmProvider {
     Map<String, dynamic>? options,
     List<Map<String, dynamic>>? tools,
   }) async => LlmResult(
-    content: '尚未配置模型提供商：用 /provider 添加，或编辑 ~/.nava/config.toml。',
+    content: '尚未配置模型提供商：用 /provider 添加，或编辑 ~/.nava_cowriter/config.toml。',
     provider: name,
     model: 'none',
   );

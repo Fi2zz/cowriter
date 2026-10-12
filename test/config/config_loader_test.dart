@@ -43,13 +43,13 @@ void _expectConfigError(String fragment, void Function() body) {
 
 void main() {
   test('常量：目录名、文件名、环境变量名', () {
-    expect(kConfigDirName, '.nava');
+    expect(kConfigDirName, '.nava_cowriter');
     expect(kConfigFileName, 'config.toml');
-    expect(kConfigHomeEnv, 'NAVA_HOME');
+    expect(kConfigHomeEnv, 'COWRITER_HOME');
   });
 
   group('resolveConfigDir', () {
-    test('NAVA_HOME 优先于 HOME', () {
+    test('COWRITER_HOME 优先于 HOME', () {
       expect(
         resolveConfigDir(
           env: <String, String>{

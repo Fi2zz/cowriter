@@ -27,17 +27,17 @@ void main() {
     final String expectedLeaf = Uri.encodeComponent(
       work.resolveSymbolicLinksSync(),
     );
-    expect(dir, '${home.path}/.nava/projects/$expectedLeaf');
+    expect(dir, '${home.path}/.nava_cowriter/projects/$expectedLeaf');
     expect(Directory(work.path).listSync(), isEmpty);
   });
 
-  test('NAVA_HOME 优先于 HOME', () {
+  test('COWRITER_HOME 优先于 HOME', () {
     final Directory custom = Directory.systemTemp.createTempSync('nava-x');
     addTearDown(() => custom.deleteSync(recursive: true));
 
     final String dir = resolveProjectDataDir(
       workdir: work.path,
-      env: <String, String>{'HOME': home.path, 'NAVA_HOME': custom.path},
+      env: <String, String>{'HOME': home.path, 'COWRITER_HOME': custom.path},
     );
 
     expect(dir, startsWith('${custom.path}/projects/'));

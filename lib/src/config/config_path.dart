@@ -1,4 +1,4 @@
-/// 配置文件位置解析：`~/.nava/config.toml`。
+/// 配置文件位置解析：`~/.nava_cowriter/config.toml`。
 ///
 /// 覆盖顺序（后者优先）：系统默认位置 → [kConfigHomeEnv] → `--config` 参数。
 library;
@@ -6,15 +6,16 @@ library;
 import 'dart:io';
 
 /// 用户级配置目录名，放在系统默认位置（macOS 为 `$HOME`）下。
-const String kConfigDirName = '.nava';
+/// 与 nava 的 `~/.nava_cowriter` 隔离，两个产品互不混数据。
+const String kConfigDirName = '.nava_cowriter';
 
 /// 配置文件名。
 const String kConfigFileName = 'config.toml';
 
 /// 覆盖配置目录的环境变量名。
-const String kConfigHomeEnv = 'NAVA_HOME';
+const String kConfigHomeEnv = 'COWRITER_HOME';
 
-/// 解析配置目录：`NAVA_HOME` 优先，否则 `$HOME`（Windows `USERPROFILE`）下的
+/// 解析配置目录：`COWRITER_HOME` 优先，否则 `$HOME`（Windows `USERPROFILE`）下的
 /// 默认位置；用户目录无法定位时抛 [StateError]，绝不回退当前工作目录。
 String resolveConfigDir({Map<String, String>? env}) {
   final Map<String, String> source = env ?? Platform.environment;
