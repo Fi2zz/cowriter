@@ -35,6 +35,7 @@ import '../diagnose/doctor.dart';
 import '../hooks/hooks.dart';
 import '../story/story.dart';
 import '../story/story_commands.dart';
+import '../story/story_notices.dart';
 import '../story/story_pending.dart';
 import '../story/story_render.dart';
 import '../subagent/subagent_progress.dart';
@@ -1925,17 +1926,21 @@ class ConatusTuiController implements TuiUserPromptHost {
     }
   }
 
-  /// SteeringSource：取回全部排队消息的文本并清空队列（Agent Loop 在组
-  /// 下一次模型请求前调用——排队消息轮内注入，不等轮末）。取出后刷新
-  /// UI（「已排队 n 条」即时递减）；注入消息的附件 v1 丢弃（插话是纯文本）。
+  /// SteeringSource：合并两个来源——先 storyNotices（人的编辑通报，先感知
+  /// 世界变化），后排队消息文本；取走即清空。Agent Loop 在组下一次模型
+  /// 请求前调用（轮内注入，不等轮末）。取出后刷新 UI（「已排队 n 条」
+  /// 即时递减）；注入消息的附件 v1 丢弃（插话是纯文本）。
   Future<List<String>> _takeQueuedForSteering() async {
-    if (_queue.isEmpty) return const <String>[];
+    final List<String> notices =
+        _sessionCtx?.get<StoryNotices>('storyNotices')?.drain() ??
+            const <String>[];
     final List<String> texts = <String>[
       for (final (String, List<TuiAttachment>) entry in _queue) entry.$1,
     ];
+    if (notices.isEmpty && texts.isEmpty) return const <String>[];
     _queue.clear();
     _refresh();
-    return texts;
+    return <String>[...notices, ...texts];
   }
 
   /// 调度交付：空闲时把提醒当作一轮用户输入投递，返回是否成功入队。

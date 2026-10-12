@@ -176,12 +176,14 @@ export 'src/story/story_commands.dart'
         discardStoryPatch,
         renderStoryDiscard,
         renderStoryPreview;
+export 'src/story/story_notices.dart'
+    show StoryNotices, StoryFileChange, diffLines, renderEditNotice;
 export 'src/story/story_pending.dart'
     show StoryPending, bindStoryPending, renderStoryPending, tryCompileOps;
 export 'src/story/story_render.dart'
     show renderStoryTimeline, storyEditedPaths, storyPatchTime;
-export 'src/story/story_watcher.dart'
-    show StoryWatcher, kStorySkipDirs, kStoryTextExtensions;
+export 'src/story/story_scan.dart' show kStorySkipDirs, kStoryTextExtensions;
+export 'src/story/story_watcher.dart' show StoryWatcher;
 export 'src/subagent/subagent_progress.dart'
     show SubAgentLine, SubAgentProgressStore;
 export 'src/subagent/swarm_member.dart'

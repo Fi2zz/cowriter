@@ -13,6 +13,7 @@ import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 
+import 'story_notices.dart';
 import 'story_pending.dart';
 import 'story_render.dart';
 import 'story_watcher.dart';
@@ -49,11 +50,14 @@ Future<DocEngine> provideStory(
     telemetry: ctx.get<Telemetry>('telemetry'),
   );
   ctx.effect(() => ctx.tools.use(recorder.observe, tag: 'story'));
+  final StoryNotices notices = StoryNotices();
+  ctx.provide('storyNotices', notices);
   _startWatcher(
     ctx,
     engine,
     watchDir ?? ctx.get<String>('workdir'),
     pollInterval,
+    notices,
   );
   if (session != null) {
     ctx.onDispose(bindStoryPending(ctx, session, StoryPending()));
@@ -70,17 +74,20 @@ Future<DocEngine> _restoreEngine(Context ctx, String sessionId) async {
 }
 
 /// 装工作目录监听：轮询间隔即防抖窗；首个 interval 用于建基线。
+/// 人的编辑通报追加进 [notices]（由 SteeringSource 轮内注入带走）。
 void _startWatcher(
   Context ctx,
   DocEngine engine,
   String? watchDir,
   Duration interval,
+  StoryNotices notices,
 ) {
   if (watchDir == null) return;
   final StoryWatcher watcher = StoryWatcher(
     engine: engine,
     dir: watchDir,
     telemetry: ctx.get<Telemetry>('telemetry'),
+    notices: notices,
   );
   ctx.interval(() => unawaited(watcher.scanOnce()), interval);
   ctx.onDispose(watcher.dispose);

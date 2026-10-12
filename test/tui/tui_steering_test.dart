@@ -4,6 +4,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
@@ -52,11 +53,13 @@ class _SteeringProvider implements LlmProvider {
   void close() {}
 }
 
-Future<(ConatusTuiController, Context, _SteeringProvider)> _build({
+Future<(ConatusTuiController, Context, _SteeringProvider, Directory)> _build({
   bool hangSecond = false,
 }) async {
   final Context app = Context.root();
   provideTools(app);
+  final Directory dir = Directory.systemTemp.createTempSync('cowriter-steer-');
+  app.provide('workdir', dir.path);
   final _SteeringProvider provider = _SteeringProvider()
     ..hangSecond = hangSecond;
   provideLlm(app, llm: FallbackLlm(<LlmProvider>[provider]));
@@ -77,7 +80,7 @@ Future<(ConatusTuiController, Context, _SteeringProvider)> _build({
     onExit: () {},
   );
   await controller.start();
-  return (controller, app, provider);
+  return (controller, app, provider, dir);
 }
 
 /// 轮询直到 [cond] 成立（超时上限 2s）。
@@ -90,7 +93,7 @@ Future<void> _until(bool Function() cond) async {
 
 void main() {
   test('busy 时排队的消息在下一次请求边界注入，队列清空、轮末不重复发送', () async {
-    final (controller, app, provider) = await _build();
+    final (controller, app, provider, _) = await _build();
     addTearDown(app.dispose);
 
     final Future<void> first = controller.handleLine('开始干活');
@@ -115,7 +118,7 @@ void main() {
   });
 
   test('Esc 打断时已注入的插话留在会话（说出去的话不收回）', () async {
-    final (controller, app, provider) = await _build(hangSecond: true);
+    final (controller, app, provider, _) = await _build(hangSecond: true);
     addTearDown(app.dispose);
 
     final Future<void> first = controller.handleLine('开始干活');
@@ -138,4 +141,63 @@ void main() {
     );
     expect(controller.queuedCount, 0);
   });
+  test('steering 合并两来源：人的编辑通报在前、排队文本在后', () async {
+    final (controller, app, provider, dir) = await _build();
+    addTearDown(() {
+      app.dispose();
+      dir.deleteSync(recursive: true);
+    });
+
+    await _settleWatcher(); // 先让 watcher 建好基线，之后的改动才算编辑
+    final Future<void> first = controller.handleLine('开始干活');
+    await _until(() => provider.calls.isNotEmpty && controller.busy);
+    // 人在 AI 工作途中改文件（watcher 轮询登记 human 补丁 + 通报）。
+    File('${dir.path}/notes.md').writeAsStringSync('人改的\n内容');
+    await controller.handleLine('排队文本');
+    await _settleWatcher();
+
+    provider.toolGate.complete(); // 放行工具 → step 1 边界注入
+    await _until(() => provider.calls.length >= 2);
+
+    final List<LlmMessage> second = provider.calls[1];
+    expect(second.last.role, 'user');
+    expect(second.last.content, '排队文本');
+    expect(second[second.length - 2].content, contains('notes.md'));
+    expect(second[second.length - 2].content, contains('修改了文件'));
+    expect(second[second.length - 3].role, 'tool');
+    await first;
+  });
+
+  test('空闲时人改文件：通报留队列，下一轮 step 0 注入', () async {
+    final (controller, app, provider, dir) = await _build();
+    addTearDown(() {
+      app.dispose();
+      dir.deleteSync(recursive: true);
+    });
+    provider.toolGate.complete(); // 工具不等门，轮次可直接跑完
+    await _settleWatcher(); // 先建基线
+
+    // 空闲时人改文件 → watcher 登记通报，留在队列。
+    File('${dir.path}/idle.md').writeAsStringSync('空闲时人新建');
+    await _settleWatcher();
+    expect(controller.busy, isFalse);
+
+    await controller.handleLine('新任务');
+    await _until(() => provider.calls.isNotEmpty);
+
+    // 下一轮 step 0 组请求前注入：第一次请求就带通报。
+    final List<LlmMessage> firstCall = provider.calls.first;
+    expect(
+      firstCall.any(
+        (LlmMessage m) => m.role == 'user' && m.content.contains('idle.md'),
+      ),
+      isTrue,
+    );
+    await _until(() => !controller.busy);
+  });
 }
+
+/// 等 watcher 至少扫过两轮（基线 + 发现改动）：轮询间隔 500ms，无外部
+/// 可观测信号，只能定时等——留足余量避免 flaky。
+Future<void> _settleWatcher() =>
+    Future<void>.delayed(const Duration(milliseconds: 1400));
