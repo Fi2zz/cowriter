@@ -4,6 +4,11 @@
 
 ## [未发布]
 
+- **apply 冲突双版本**：pending 登记时记录每个目标文件的基底内容；
+  apply 时磁盘 ≠ 基底即冲突——git 式 marker 双版本落盘（人的版本在上、
+  AI 待定内容在下），不覆盖不静默失败；落故事的 op 带实际落盘文本
+  （故事与磁盘一致），部分冲突时干净文件正常写、一条补丁 commit。
+  ops 通道与工具通道的 pending 同样处理。
 - **事前审阅（pending scope）**：交互模式下 `write_file` / `edit_file` /
   `apply_patch` 被 `StoryReviewGate` 拦成待定补丁（本地算出执行后内容，
   不落盘；算不出则 fail-open 放行给真实工具报错），人经 `/story apply`

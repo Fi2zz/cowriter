@@ -5,9 +5,13 @@
 /// 正常 `DocEngine.commit` 落 `doc/patch` 事件。
 library;
 
+import 'dart:async';
+
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+
+import 'story_conflict.dart';
 
 /// 编译助手文本里的 ops 块；无块或编译失败（普通回复里自然出现的
 /// ```` ``` ```` 块）都返回空——绝不因此炸会话。
@@ -26,6 +30,10 @@ List<PatchOp> tryCompileOps(String text) {
 class StoryPending {
   final List<DocPatch> _patches = <DocPatch>[];
   final Map<String, String> _sources = <String, String>{};
+
+  /// 补丁 id →（文件 → 提出时的基底内容；null = 当时不存在）。
+  final Map<String, Map<String, String?>> _bases =
+      <String, Map<String, String?>>{};
   int _seq = 0;
 
   /// 待应用补丁（追加序）。
@@ -34,19 +42,26 @@ class StoryPending {
   /// 补丁 id → 来源（工具名或 'ops'）；渲染列表用。
   Map<String, String> get sources => Map<String, String>.unmodifiable(_sources);
 
-  /// 喂入一条助手回复；编译出非空 ops 时存为一个待应用补丁。
-  void feed(String text) {
+  /// 喂入一条助手回复；编译出非空 ops 时存为一个待应用补丁（[fs] 用于
+  /// 记录提出时的基底内容，apply 冲突检测用）。
+  Future<void> feed(String text, {FileSystem? fs}) async {
     final List<PatchOp> ops = tryCompileOps(text);
     if (ops.isEmpty) return;
-    feedOps(ops);
+    await feedOps(ops, fs: fs);
   }
 
   /// 直接登记一组 ops 为一个待应用补丁，返回其序号（1 起）。
-  int feedOps(List<PatchOp> ops, {String source = 'ops'}) {
+  /// 同时经 [fs] 记录每个目标文件的基底内容（apply 时比对磁盘判冲突）。
+  Future<int> feedOps(
+    List<PatchOp> ops, {
+    String source = 'ops',
+    FileSystem? fs,
+  }) async {
     _seq += 1;
     final String id = 'pending-${DateTime.now().microsecondsSinceEpoch}-$_seq';
     _patches.add(DocPatch(id: id, author: PatchAuthor.ai, ops: ops));
     _sources[id] = source;
+    _bases[id] = await readPendingBases(fs, ops);
     return _patches.length;
   }
 
@@ -57,6 +72,7 @@ class StoryPending {
     }
     final DocPatch removed = _patches.removeAt(index - 1);
     _sources.remove(removed.id);
+    _bases.remove(removed.id);
     return '已丢弃第 $index 个待定补丁（${removed.ops.length} 个文件未改动）。';
   }
 
@@ -90,23 +106,37 @@ class StoryPending {
     DocEngine engine,
     FileSystem fs,
   ) async {
+    final Map<String, String?>? bases = _bases[patch.id];
+    final List<PatchOp> landed = <PatchOp>[];
+    int conflicts = 0;
     for (final PatchOp op in patch.ops) {
-      final String text = switch (op) {
-        InsertBlockOp() => op.text,
-        ReplaceBlockOp() => op.text,
-        _ => '',
-      };
-      await fs.writeText(await fs.resolve(op.blockId), text);
+      final bool blockExists =
+          indexOfBlock(engine.state.blocks, op.blockId) >= 0;
+      final ({PatchOp op, bool conflicted}) result = await applyPendingOp(
+        fs,
+        op,
+        bases,
+        index,
+        blockExists: blockExists,
+      );
+      landed.add(result.op);
+      if (result.conflicted) conflicts++;
     }
-    _sources.remove(_patches.removeAt(index - 1).id);
+    final DocPatch removed = _patches.removeAt(index - 1);
+    _sources.remove(removed.id);
+    _bases.remove(removed.id);
     await engine.commit(
       DocPatch(
         id: 'story-${DateTime.now().microsecondsSinceEpoch}-a$index',
         author: PatchAuthor.ai,
-        ops: patch.ops,
+        ops: landed,
       ),
     );
-    return '已应用第 $index 个补丁（${patch.ops.length} 个文件），并入故事线。';
+    if (conflicts == 0) {
+      return '已应用第 $index 个补丁（${patch.ops.length} 个文件），并入故事线。';
+    }
+    return '已应用第 $index 个补丁（${patch.ops.length} 个文件），并入故事线；'
+        '冲突：$conflicts 个文件已留双版本（$kConflictOpen 标记），请人工合并。';
   }
 }
 
@@ -131,9 +161,10 @@ String renderStoryPending(
 /// 返回撤销函数（随会话子上下文释放）。
 Disposer bindStoryPending(Context ctx, Session session, StoryPending pending) {
   ctx.provide('storyPending', pending);
+  final FileSystem? fs = ctx.get<FileSystem>('fs');
   return session.onEvent((SessionEvent event) {
     if (event.type != kAssistantMessageEvent) return;
-    pending.feed(_assistantText(event.data));
+    unawaited(pending.feed(_assistantText(event.data), fs: fs));
   });
 }
 

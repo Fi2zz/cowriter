@@ -173,8 +173,8 @@ void main() {
       // discard 驳回第二版 → 写回第一版；pending 应用再写一次——两者都与
       // 引擎 fold 一致，watcher 归因跳过。
       await discardStoryPatch(engine, fs, 2);
-      final StoryPending pending = StoryPending()
-        ..feed('''
+      final StoryPending pending = StoryPending();
+      await pending.feed('''
 ```ops
 [{"kind":"replace","blockId":"a.md","text":"第二版"}]
 ```

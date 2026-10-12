@@ -178,6 +178,14 @@ export 'src/story/story_commands.dart'
         discardStoryPatch,
         renderStoryDiscard,
         renderStoryPreview;
+export 'src/story/story_conflict.dart'
+    show
+        applyPendingOp,
+        conflictClose,
+        kConflictOpen,
+        kConflictSplit,
+        mergeConflictVersions,
+        readPendingBases;
 export 'src/story/story_notices.dart'
     show StoryNotices, StoryFileChange, diffLines, renderEditNotice;
 export 'src/story/story_pending.dart'
