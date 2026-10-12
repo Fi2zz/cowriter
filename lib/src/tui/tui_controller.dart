@@ -238,7 +238,7 @@ class ConatusTuiController implements TuiUserPromptHost {
   /// `/model [名字]` 钩子：返回给用户的提示文本（null 表示不提示）。
   ///
   /// 缺省 null 时该命令提示先配置提供商（/provider add 或编辑 config.toml）。
-  /// 宿主（如 playground）在此切换 LLM 提供商：
+  /// 宿主（自定义入口）在此切换 LLM 提供商：
   /// 替换根上下文服务后调 [rebind] 让 Agent Loop 用上新提供商。
   Future<String?> Function(String arg)? onModelCommand;
 
@@ -733,10 +733,6 @@ class ConatusTuiController implements TuiUserPromptHost {
         await _handleGoal(arg);
       case 'init':
         await _handleInit();
-      case 'commit':
-        await _handleCommit();
-      case 'review':
-        await _handleReview();
       case 'compact':
         await _handleCompact();
       case 'rewind':
@@ -1148,7 +1144,7 @@ class ConatusTuiController implements TuiUserPromptHost {
   /// `/doctor`：聚合体检（不经模型，只读）。
   void _showDoctor() {
     final List<DoctorCheck> checks = doctorChecks(_app);
-    final StringBuffer buffer = StringBuffer('nava 体检：');
+    final StringBuffer buffer = StringBuffer('cowriter 体检：');
     int failed = 0;
     for (final DoctorCheck check in checks) {
       final String mark = check.ok ? '✓' : (check.warning ? '⚠' : '✗');
@@ -1176,29 +1172,6 @@ class ConatusTuiController implements TuiUserPromptHost {
     } on GoalException catch (e) {
       transcript.add(TuiRole.system, '目标操作失败：${e.message}');
     }
-  }
-
-  /// `/commit`：提交流程——模型查看暂存 diff、写 Conventional Commits 提交
-  /// 信息并经 `git_commit` 工具提交（high 风险走审批）。
-  Future<void> _handleCommit() async {
-    await submit(
-      '执行提交流程：\n'
-      '1. 先用 git_status 看有哪些未暂存的改动；'
-      '若还有未暂存的，用 git_add 暂存（all=true 暂存全部，'
-      '或按 paths 列出要暂存的路径）。\n'
-      '2. 用 git_diff --staged 查看已暂存的改动。\n'
-      '3. 基于改动写一条 Conventional Commits 提交信息（scope + 中文描述），'
-      '用 git_commit 工具提交。',
-    );
-  }
-
-  /// `/review`：审查当前未提交改动（提交/提 PR 前自检，只审不改）。
-  Future<void> _handleReview() async {
-    await submit(
-      '审查当前未提交改动：用 git_diff 查看未暂存与暂存的全部差异，'
-      '从命名、边界条件、安全隐患、性能四个方面给出结构化发现清单；'
-      '**只审不改**，不要直接修改代码。若没有未提交改动，直接说明。',
-    );
   }
 
   /// `/init`：让模型扫描仓库并生成 / 更新 AGENTS.md。

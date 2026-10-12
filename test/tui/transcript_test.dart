@@ -110,7 +110,7 @@ void main() {
     final Session session = Session(id: 's');
     session.append(kToolResultEvent, data: <String, Object?>{
       'callId': '1',
-      'name': 'run_code',
+      'name': 'apply_patch',
       'content': '第一行\n第二行\n第三行',
       'isError': false,
     });

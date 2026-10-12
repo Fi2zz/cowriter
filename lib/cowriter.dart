@@ -1,8 +1,8 @@
-/// conatus_code：基于 conatus 运行时的终端编码智能体。
+/// cowriter：基于 conatus 运行时的终端人机双写协同写作 Agent。
 ///
-/// 原 `conatus_tui` / `conatus_fs_tools` / `conatus_coding` 三个包已合并进本包，
-/// 各自保留独立入口：[tui.dart] / [fs_tools.dart] / [coding.dart]。本文件是
-/// conatus_code 自身新增能力的入口（配置、沙箱、新增工具）。
+/// 原 `conatus_tui` / `conatus_fs_tools` 两个包已合并进本包，
+/// 各自保留独立入口：[tui.dart] / [fs_tools.dart]。本文件是
+/// cowriter 自身新增能力的入口（配置、沙箱、新增工具）。
 library;
 
 export 'src/assembly/permission_mode.dart' show toTuiPermissionMode;
@@ -175,15 +175,9 @@ export 'src/subagent/swarm_member.dart'
     show SwarmMember, SwarmProjection, SwarmSink;
 export 'src/tools/apply_patch.dart' show ApplyPatchTool;
 export 'src/tools/code_tools.dart' show provideCodeTools;
-export 'src/tools/git_tools.dart'
-    show GitCommitTool, GitDiffTool, GitRun, GitStatusTool, gitQuote, runGit;
-export 'src/tools/git_write_tools.dart'
-    show GitAddTool, GitBranchTool, GitStashTool;
 export 'src/tools/list_files.dart' show ListFilesTool;
-export 'src/tools/run_command.dart' show RunCommandTool;
-export 'src/tools/run_tests.dart' show RunTestsTool;
 export 'src/tools/update_plan.dart' show UpdatePlanTool, provideUpdatePlanTool;
 export 'src/tui/project_context.dart'
     show kProjectContextMaxChars, loadProjectContext;
 export 'src/tui/recent_session.dart' show findRecentSessionId;
-export 'src/version.dart' show navaVersion;
+export 'src/version.dart' show cowriterVersion;

@@ -25,7 +25,7 @@ Claude Code 插件仓库的目录形态——够用，缺的只是挂接点。�
 这个插件是什么形态？
 ├─ 纯 Markdown 技能包（SKILL.md 目录）      → 形态一：挂载到技能发现根
 ├─ MCP server（JS / Python / 任何语言）     → 形态二：[mcp.servers.*] 配置
-├─ CLI 或可执行脚本                          → 形态三：run_command 或 hooks
+├─ CLI 或可执行脚本                          → 形态三：run_command_background 或 hooks
 └─ 纯库（只暴露编程 API，无进程接口）         → 形态四：写一个 MCP 适配壳
 ```
 
@@ -99,7 +99,7 @@ system prompt 常驻段（而非一次性消息，压缩后仍在）；或加配
 ### 兼容性注意
 
 - 技能正文引用的工具名是 Claude Code 的（`Task` / `Bash` / `Read` 等），
-  nava 对应 `spawn_agent` / `run_command` / `read_file` 等，名字足够接近，
+  nava 对应 `spawn_agent` / `run_command_background` / `read_file` 等，名字足够接近，
   模型一般能自行对上；严格要求可在项目 `.conatus/skills/` 放一份映射说明
   技能兜底
 - 涉及写操作的技能（TDD、git worktree）触到的工具照常走审批与沙箱，
@@ -148,8 +148,8 @@ config.toml 的 `[mcp.servers.*]`——形状等价但格式不同。支持直�
 
 插件是一个能跑命令的程序（lint 器、生成器、检查脚本）：
 
-- **偶尔调用**：让模型走 `run_command` 直接调，照常过 CommandPolicy 裁决与
-  沙箱——无需任何配置
+- **偶尔调用**：让模型走 `run_command_background` 直接调，照常过沙箱与
+  审批（high 风险）——无需任何配置
 - **每次工具调用前后固定跑**：配成 hook。hook 经 `/bin/sh -c` 直连运行，
   写 JS/Python/任何脚本语言都可以：
 
@@ -216,7 +216,7 @@ args = ["/home/you/.nava/wrappers/thing/server.mjs"]
 | MCP stdio server | 等同安装本地程序 | **不走 Layer 2** |
 | MCP http/sse server | 远端端点，凭据经 headers | n/a |
 | hooks | 等同你本人跑 shell | **直连，不经沙箱** |
-| 形态三 `run_command` | 模型发起的命令 | 走 Layer 2 + 审批 |
+| 形态三 `run_command_background` | 模型发起的命令 | 走 Layer 2 + 审批 |
 
 原则：凡是你写进配置的受信端（MCP / hooks），nava 按你的显式声明放行；
 凡是模型运行时发起的动作，走沙箱与审批。两类风险面不混。

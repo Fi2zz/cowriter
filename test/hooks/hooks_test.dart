@@ -42,13 +42,13 @@ void main() {
     ]));
 
     final String? denial = await hooks.preToolUse(
-      const ToolCall(name: 'git_status', arguments: <String, Object?>{'a': 1}),
+      const ToolCall(name: 'read_file', arguments: <String, Object?>{'a': 1}),
     );
 
     expect(denial, isNull);
     expect(
       File(out).readAsStringSync(),
-      contains('pre_tool_use|git_status|{"a":1}'),
+      contains('pre_tool_use|read_file|{"a":1}'),
     );
   });
 

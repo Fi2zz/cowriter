@@ -74,7 +74,7 @@ void main() {
     await controller.handleLine('/doctor');
 
     final String text = controller.transcript.messages.last.text;
-    expect(text, contains('nava 体检'));
+    expect(text, contains('cowriter 体检'));
     expect(text, contains('✓ 工具表'));
     expect(text, contains('✗ 模型提供商'));
     expect(text, contains('需处理项'));

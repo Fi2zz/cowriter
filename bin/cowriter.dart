@@ -1,4 +1,4 @@
-// conatus_code — 基于 conatus 运行时的终端编码智能体
+// cowriter — 基于 conatus 运行时的终端人机双写协同写作 Agent
 
 import 'dart:io';
 
@@ -14,7 +14,7 @@ Future<void> main(List<String> args) async {
     return;
   }
   if (options.versionRequested) {
-    stdout.writeln('nava $navaVersion');
+    stdout.writeln('cowriter $cowriterVersion');
     return;
   }
   // `-p` 出现但没有任务文本：报错退出，而不是静默落回全交互 TUI——

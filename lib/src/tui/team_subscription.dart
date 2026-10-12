@@ -17,7 +17,7 @@ import 'team_snapshot.dart';
 
 /// 团队成本来源（可选 seam）。
 ///
-/// 宿主提供 `totalCost` 后，状态栏即可显示成本；conatus_code 经 costTracker
+/// 宿主提供 `totalCost` 后，状态栏即可显示成本；cowriter 经 costTracker
 /// 的真实费率注入。
 abstract class TeamCostSource {
   /// 累计成本。

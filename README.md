@@ -168,13 +168,8 @@ busy 时输入不再被拒：自动排队（上限 20 条），当前轮收口�
 打断会**清空队列**并提示条数；切换会话同样清空。cron/提醒的投递不受影响
 （busy 时仍由调度器重试）。
 
-## `/commit` 与 `/doctor`
+## `/doctor`
 
-- `/commit`：完整提交流程——`git_status` 看未暂存的 → `git_add` 暂存 →
-  `git_diff --staged` 复核 → 写 Conventional Commits 提交信息 → `git_commit`
-  提交（high 风险走审批）。
-- `/review`：审查当前未提交改动（命名/边界/安全/性能，**只审不改**），
-  提交/提 PR 前自检。
 - `/doctor`：体检——配置 / 提供商 / 回退链 / 模型窗口与费率 / 沙箱（Layer 1/2）/
   工具表 / MCP / rg 逐项 ✓/✗ + 修复提示，自查用。
 
@@ -234,18 +229,6 @@ OS Error: Path does not exist, path = 'lib/…/nope.dart'
 
 思考折叠进 `<details>`，内部事件（`agent/round` / `plan/updated`）不进导出。
 **不放工作区**——与会话 / 检查点同一取舍，导出是工具产物，不该往代码仓库留垃圾。
-
-### git 工具面
-`git_status` / `git_diff`（只读）· `git_add` / `git_branch` / `git_stash`
-（medium，默认不拦）· `git_commit`（high，走审批）。
-
-**缺 `git_add` 曾经是条断路**：`/commit` 的提示词让模型「向用户说明并给出建议
-（如先 git add 暂存）」，而模型想自己暂存只能走 `run_command`（`ToolRisk.high`），
-于是每次提交都要弹一次审批框，例行步骤被推回给了用户。
-
-三个写操作工具**都不提供丢数据的入口**（无 `reset --hard` / `clean` /
-`switch -C` / `push --force`）——那些留给用户自己在终端里做。`git_add` 缺参时
-报错而不是默认全量暂存，避免模型一次手滑把整个仓库扫进去。
 
 ## `!` 快捷 shell 与 lint-on-edit
 
@@ -401,7 +384,7 @@ max_attempts = 4
 （`TuiRole.stage` 暗色行，不污染助手正文的排版。）
 
 **默认只读白名单**：不传 `tools` 时子 Agent 拿到 `get_time` / `echo` /
-`read_file` / `rg` / `glob` / `list_files` / `git_status` / `git_diff`——够调研，
+`read_file` / `rg` / `glob` / `list_files`——够调研，
 但不给写 / 执行类。显式传 `tools` 也**排除 high 风险**（双保险：写 / 执行类即便
 被点名也要过审批）。
 

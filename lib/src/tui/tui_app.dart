@@ -197,7 +197,7 @@ class ConatusTuiRuntime {
 
     provideFileSystemLocal(app, fs: fs);
     // 'shell' 既是 rg 的必需依赖（fs 工具回落到 ctx.get('shell')），也是命令执行
-    // 的唯一接缝：注入受限实现后 rg / run_command / run_tests / run_code 一并跟随。
+    // 的唯一接缝：注入受限实现后 rg / 后台任务等一并跟随。
     provideShellLocal(app, executor: shell);
     // 'shellInteractive'：用户直发命令（`!` shell 模式）的交互缝——本地直执、
     // 不过模型命令白名单（对齐 OpenCode）；模型命令仍走上面的 'shell' 沙箱缝。
@@ -209,8 +209,7 @@ class ConatusTuiRuntime {
     // 规范化过的 —— macOS 上 /var → /private/var、/tmp → /private/tmp 这种别名
     // 会让首次写入被误判越界。
     provideToolResultEviction(app, dir: toolResultSpillDir(canonicalWorkdir));
-    // conatus_code 自己的工具：list_files / git_status / git_diff（M3 起再加
-    // run_command / run_tests / apply_patch）。同样跟随上面的 fs / shell 接缝。
+    // cowriter 自己的工具：list_files / apply_patch。跟随上面的 fs 接缝。
     provideCodeTools(app);
 
     // ── 交互：选项浮层 + 工具审批（headless 不装）────────────────
@@ -429,7 +428,7 @@ class ConatusTuiRuntime {
         costTracker: costTracker,
       ),
       // 默认只读探索集：子 Agent 无人看管，默认不给写 / 执行类（write_file 等
-      // 是 medium、run_command 等是 high；high 在框架层已被 `_allowedTools`
+      // 是 medium、shell 命令类是 high；high 在框架层已被 `_allowedTools`
       // 挡掉，这里再把 medium 写操作排除）。rg/glob/list_files 是定位文件的
       // 入口——缺了它们，模型没显式传 tools 时子 Agent 只能读已知路径。
       defaultTools: const <String>[
@@ -439,8 +438,6 @@ class ConatusTuiRuntime {
         'rg',
         'glob',
         'list_files',
-        'git_status',
-        'git_diff',
       ],
       permissionMode: subagentPermission,
     );
@@ -486,7 +483,7 @@ class ConatusTuiRuntime {
       PromptSection(
         name: 'coding',
         text: () =>
-            '编码任务先规划后执行：复杂任务先用 plan_write 制定执行计划，'
+            '复杂任务先规划后执行：先用 plan_write 制定执行计划，'
             '执行中每完成一步用 update_plan 标记进度；工具失败时反思原因并重试或调整方案。',
       ),
     );
