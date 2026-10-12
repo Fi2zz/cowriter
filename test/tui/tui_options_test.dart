@@ -1,7 +1,7 @@
 /// 入口命令行选项解析。
 library;
 
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 void main() {

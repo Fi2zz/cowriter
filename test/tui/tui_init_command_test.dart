@@ -3,10 +3,10 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 记录实际收到的用户输入并回一句固定回复。

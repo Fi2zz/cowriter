@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 /// 断言 [body] 抛 sandboxDenied 的 [FsError]。

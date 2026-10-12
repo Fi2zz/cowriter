@@ -9,7 +9,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 
 Future<void> main(List<String> args) async {
   final int fileCount = args.isEmpty ? 2000 : int.parse(args.first);

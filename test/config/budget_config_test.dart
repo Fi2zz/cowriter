@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 /// 建临时目录；用例结束即递归删除。

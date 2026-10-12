@@ -1,8 +1,8 @@
 /// 团队渲染件测试（nocterm 测试框架）：状态栏 / 成员卡片 / 任务行 / 团队视图。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_team/conatus_team.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 Teammate _mate(String id, TeammateStatus status) => Teammate(

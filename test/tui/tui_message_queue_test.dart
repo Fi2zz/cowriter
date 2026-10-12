@@ -3,10 +3,10 @@ library;
 
 import 'dart:async';
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 第一轮挂起直到 [gate] 放行；记录收到的 prompt 顺序。

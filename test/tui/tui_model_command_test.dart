@@ -1,11 +1,11 @@
 /// `/model` 命令与 [ConatusTuiController.rebind]：运行时换模型。
 library;
 
-import 'package:conatus_code/providers.dart';
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/providers.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 固定回复的假 provider。

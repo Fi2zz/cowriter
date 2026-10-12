@@ -1,7 +1,7 @@
 /// 选项浮层状态机：选择 / 取消 / 超时 / 被取代。
 library;
 
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 TuiChoiceRequest _request({bool withCurrent = false}) => TuiChoiceRequest(

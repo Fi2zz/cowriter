@@ -3,8 +3,8 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/cowriter.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 String _dir() {

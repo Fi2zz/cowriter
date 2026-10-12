@@ -7,7 +7,7 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 /// 路径权限位（低 12 位）；目录与文件同语义。

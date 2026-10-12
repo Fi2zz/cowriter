@@ -4,12 +4,12 @@ library;
 import 'dart:async';
 
 import 'package:conatus_agent/conatus_agent.dart';
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_cron/conatus_cron.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
 import 'package:conatus_tasks/conatus_tasks.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 模型调用挂起不返回，直到被放行（模拟对端不响应）。

@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:conatus_code/coding.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+import 'package:cowriter/coding.dart';
 import 'package:test/test.dart';
 
 import 'support/fake_shell.dart';

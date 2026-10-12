@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 /// 把 [content] 写进临时目录的 `config.toml`，返回解析结果。

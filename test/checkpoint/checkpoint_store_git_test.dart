@@ -6,7 +6,7 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 /// 建一个「用户项目 + 影子仓库」；返回 (store, 工作区根, projectDir)。

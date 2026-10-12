@@ -4,8 +4,8 @@ import 'dart:io';
 
 import 'package:conatus_agent/conatus_agent.dart'
     show SubAgentPermission, parseSubAgentPermission;
-import 'package:conatus_code/conatus_code.dart';
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/cowriter.dart';
+import 'package:cowriter/tui.dart';
 
 Future<void> main(List<String> args) async {
   final TuiOptions options = TuiOptions.parse(args);

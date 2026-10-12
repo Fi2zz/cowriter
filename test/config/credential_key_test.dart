@@ -9,11 +9,11 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
-import 'package:conatus_code/providers.dart';
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_credentials/conatus_credentials.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/cowriter.dart';
+import 'package:cowriter/providers.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 class _S implements LlmProvider {

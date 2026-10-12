@@ -4,9 +4,9 @@ library;
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/cowriter.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 按脚本返回结果的假 provider。

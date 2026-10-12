@@ -1,7 +1,7 @@
 /// headless 安全闸门（E-9）：沙箱关闭 + 无人值守拒绝启动、always_ask 提示。
 library;
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 const SandboxSettings _sandboxOn = SandboxSettings();

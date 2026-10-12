@@ -1,5 +1,5 @@
-import 'package:conatus_code/conatus_code.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 void main() {

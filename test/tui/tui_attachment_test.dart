@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:conatus_code/src/tui/tui_attachment.dart';
-import 'package:conatus_code/src/tui/tui_clipboard_image.dart';
+import 'package:cowriter/src/tui/tui_attachment.dart';
+import 'package:cowriter/src/tui/tui_clipboard_image.dart';
 import 'package:test/test.dart';
 
 void main() {

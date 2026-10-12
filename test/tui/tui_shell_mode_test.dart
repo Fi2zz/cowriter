@@ -1,7 +1,7 @@
 /// shell 模式（OpenCode 式）状态机单测。
 library;
 
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 void main() {

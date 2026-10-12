@@ -5,7 +5,7 @@
 // 正式版的启动预检在 lib/src/sandbox/sandbox_probe.dart。
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 
 Future<void> main() async {
   stdout.writeln('cwd: ${Directory.current.path}');

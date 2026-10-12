@@ -1,7 +1,7 @@
 /// shell 模式 UI：`!` 前缀 + 占位提示 / 状态栏操作键。
 library;
 
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 void main() {

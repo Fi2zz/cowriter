@@ -1,8 +1,8 @@
 /// TeamSnapshot 纯单元测试：派生指标与可领取任务判定。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_team/conatus_team.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 Teammate _mate(String id, TeammateStatus status) => Teammate(

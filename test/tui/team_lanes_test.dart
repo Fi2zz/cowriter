@@ -3,8 +3,8 @@ library;
 
 import 'dart:async';
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_team/conatus_team.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 void _act(MemberLaneBuilder b, String id, TeammateActivity a) =>

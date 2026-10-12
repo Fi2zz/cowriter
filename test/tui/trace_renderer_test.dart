@@ -1,8 +1,8 @@
 /// `/trace` 复盘渲染：把会话事件摊成可读时间线。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 SessionEvent _event(int seq, String type, [Map<String, Object?>? data]) =>

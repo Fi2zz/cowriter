@@ -1,9 +1,9 @@
 /// 提供商注册表：只读视图、按名查找与 LlmProvider 构造。
 library;
 
-import 'package:conatus_code/providers.dart';
 import 'package:conatus_credentials/conatus_credentials.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/providers.dart';
 import 'package:test/test.dart';
 
 ProviderProfile profile(String name, {String? model}) => ProviderProfile(

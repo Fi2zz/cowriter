@@ -1,11 +1,11 @@
 /// 技能斜杠命令（`/skill:<技能名>`）：投影、展开、折叠与分发。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
 import 'package:conatus_skill/conatus_skill.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 记录每次模型调用的假 provider。

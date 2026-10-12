@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:conatus_agent/conatus_agent.dart';
-import 'package:conatus_code/coding.dart';
-import 'package:conatus_code/fs_tools.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_tasks/conatus_tasks.dart';
+import 'package:cowriter/coding.dart';
+import 'package:cowriter/fs_tools.dart';
 import 'package:test/test.dart';
 
 import 'support/fake_shell.dart';

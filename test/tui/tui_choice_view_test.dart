@@ -1,10 +1,10 @@
 /// 选项浮层的渲染与按键：↑↓ 移动、Enter 确认、Esc 取消。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 从不被调用的占位 provider。

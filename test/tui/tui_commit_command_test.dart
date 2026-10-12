@@ -1,10 +1,10 @@
 /// `/commit` 命令：提交流程提示词触发。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 记录收到的提示词并回一句固定回复。

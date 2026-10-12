@@ -1,7 +1,7 @@
 /// `/` 命令菜单浮层的渲染：限行滚动 + 计数。
 library;
 
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 void main() {

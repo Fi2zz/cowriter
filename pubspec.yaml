@@ -1,9 +1,9 @@
-name: conatus_code
+name: cowriter
 description: >-
-  A terminal coding agent built on the conatus runtime.
+  人机双写协同写作 Agent，基于 conatus 运行时（从 conatus_code 分叉）。
 version: 0.1.0
-repository: https://github.com/Fi2zz/conatus_code
-issue_tracker: https://github.com/Fi2zz/conatus_code/issues
+repository: https://github.com/Fi2zz/cowriter
+issue_tracker: https://github.com/Fi2zz/cowriter/issues
 publish_to: none
 
 environment:

@@ -9,12 +9,12 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
-import 'package:conatus_code/providers.dart';
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/cowriter.dart';
+import 'package:cowriter/providers.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 class _Stub implements LlmProvider {

@@ -3,7 +3,7 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 /// 建临时目录并在其中写 [files]（`文件名 → 内容`），返回目录路径。

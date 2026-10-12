@@ -1,8 +1,8 @@
 /// BackgroundTaskService 退出语义：keep_alive_on_exit 决定 shutdown 杀或留。
 library;
 
-import 'package:conatus_code/conatus_code.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 import 'support/fake_shell.dart';

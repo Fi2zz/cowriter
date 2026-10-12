@@ -1,11 +1,11 @@
 /// /team 与 /task 斜杠命令测试（不经模型，直调团队服务）。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
 import 'package:conatus_team/conatus_team.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 按脚本返回结果的假 provider（团队装配需要 llm 服务在场）。

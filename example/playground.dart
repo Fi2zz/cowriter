@@ -6,10 +6,10 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:conatus/conatus.dart';
-import 'package:conatus_code/coding.dart';
-import 'package:conatus_code/fs_tools.dart';
-import 'package:conatus_code/providers.dart';
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/coding.dart';
+import 'package:cowriter/fs_tools.dart';
+import 'package:cowriter/providers.dart';
+import 'package:cowriter/tui.dart';
 
 Future<void> main(List<String> args) async {
   final TuiOptions options = TuiOptions.parse(args);

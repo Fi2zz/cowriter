@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:conatus_code/fs_tools.dart';
+import 'package:cowriter/fs_tools.dart';
 import 'package:test/test.dart';
 
 void main() {

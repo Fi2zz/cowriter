@@ -1,7 +1,7 @@
 /// `-p` / `--print` 与 `--output-format` 的解析：headless 入口选项。
 library;
 
-import 'package:conatus_code/tui.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 void main() {

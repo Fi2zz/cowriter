@@ -6,9 +6,9 @@ library;
 
 import 'dart:async';
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_team/conatus_team.dart';
 import 'package:conatus_tts/conatus_tts.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 记录播报文本的假 TTS provider。

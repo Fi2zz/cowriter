@@ -1,8 +1,8 @@
 /// GitCommitTool：git commit 的消息转义、body 拼接与失败映射。
 library;
 
-import 'package:conatus_code/conatus_code.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 import '../fs_tools/support/fake_shell.dart';

@@ -1,7 +1,7 @@
 /// `dart analyze --format=machine` 解析与渲染的纯函数测试。
 library;
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 const String kRoot = '/repo';

@@ -1,7 +1,7 @@
 import 'package:conatus_agent/conatus_agent.dart';
-import 'package:conatus_code/conatus_code.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 void main() {

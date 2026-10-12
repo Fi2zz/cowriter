@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:conatus_code/src/tui/system_notifier.dart';
 import 'package:conatus_cron/conatus_cron.dart';
+import 'package:cowriter/src/tui/system_notifier.dart';
 import 'package:test/test.dart';
 
 void main() {

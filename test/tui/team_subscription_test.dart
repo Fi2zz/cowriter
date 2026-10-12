@@ -3,8 +3,8 @@ library;
 
 import 'dart:async';
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_team/conatus_team.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 手写团队测试替身：用 [emit] 注入事件，快照从当前列表读取。

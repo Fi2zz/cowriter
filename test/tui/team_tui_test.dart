@@ -1,11 +1,11 @@
 /// 团队 UI 集成测试：装配真实团队后，状态栏随事件出现、Ctrl+T 切换视图。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
 import 'package:conatus_team/conatus_team.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 从不被调用的占位 provider（spawn 只建成员运行时，不触发模型调用）。

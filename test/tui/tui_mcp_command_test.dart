@@ -1,11 +1,11 @@
 /// `/mcp` 命令：列出已接入的 MCP server（就绪状态 / 工具数）。
 library;
 
-import 'package:conatus_code/conatus_code.dart';
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/cowriter.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 import '../mcp/support/fake_mcp_transport.dart';

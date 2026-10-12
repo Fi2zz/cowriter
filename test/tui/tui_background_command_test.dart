@@ -1,11 +1,11 @@
 /// `/background` 命令：list / output / kill（不经模型）。
 library;
 
-import 'package:conatus_code/conatus_code.dart';
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/cowriter.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 import '../background/support/fake_shell.dart';

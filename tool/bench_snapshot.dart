@@ -6,7 +6,7 @@
 // 用法：dart run tool/bench_snapshot.dart <workspaceDir>
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 
 Future<void> main(List<String> args) async {
   final String root = args.isEmpty ? Directory.current.path : args.first;

@@ -11,7 +11,7 @@
 //   dart run tool/play.dart lsTree   <workdir> <dataDir> <session> <turn>
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
+import 'package:cowriter/cowriter.dart';
 
 const String _tmpRoot = '/tmp';
 

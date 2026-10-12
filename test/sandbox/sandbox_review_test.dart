@@ -3,8 +3,8 @@ library;
 
 import 'dart:io';
 
-import 'package:conatus_code/conatus_code.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
+import 'package:cowriter/cowriter.dart';
 import 'package:test/test.dart';
 
 /// 假 sandbox-exec：剥掉 `-p <profile> <params> --` 前缀后原样 exec，

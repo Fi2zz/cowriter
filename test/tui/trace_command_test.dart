@@ -1,10 +1,10 @@
 /// `/trace` 命令：把一轮的真实事件复盘成可读时间线。
 library;
 
-import 'package:conatus_code/tui.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
+import 'package:cowriter/tui.dart';
 import 'package:test/test.dart';
 
 /// 先调一次工具（失败）再收口，用来造出可复盘的事件序列。
