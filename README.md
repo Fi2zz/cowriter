@@ -173,6 +173,22 @@ busy 时输入不再被拒：自动排队（上限 20 条），当前轮收口�
 - `/doctor`：体检——配置 / 提供商 / 回退链 / 模型窗口与费率 / 沙箱（Layer 1/2）/
   工具表 / MCP / rg 逐项 ✓/✗ + 修复提示，自查用。
 
+## 故事层（人机双写）
+
+基于 conatus_doc 的文档补丁引擎，把文件编辑映射为补丁：**一次成功的
+`write_file` / `edit_file` / `apply_patch` = 一个补丁**（`author: ai`，
+`apply_patch` 多文件时一个补丁含多个 op）；块 = 文件的薄映射，块 id 即文件
+相对路径。失败的工具调用不记；读回新内容失败时降级为空文本并记 telemetry
+（`story.record_failed`），不影响工具调用本身。
+
+- `/story`：列出本会话的补丁时间轴——序号、作者（人/AI）、补丁 id、涉及
+  文件、落定时间。
+- 补丁随会话子上下文装配（TUI 与 headless 都生效）；装配了 `sessionLog`
+  服务时每次提交同步落 `doc/patch` 会话事件，可用 `rebuildDocEngine` 从
+  事件流重建整条故事线。
+- 人的编辑与 AI 补丁同权：引擎同时接受 `PatchAuthor.human` 补丁（见
+  conatus_doc 与根仓 `docs/人机双写范式设计文档.md`）。
+
 ### `/trace` 复盘
 
 ```

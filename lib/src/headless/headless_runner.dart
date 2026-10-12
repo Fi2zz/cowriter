@@ -11,6 +11,7 @@ import 'package:conatus_agent/conatus_agent.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 
+import '../story/story.dart';
 import '../tui/tui_app.dart';
 
 /// headless 输出格式。
@@ -55,6 +56,7 @@ Future<HeadlessResult> runHeadless(
     'headless:${session.id}',
     (Context child) {
       provideAgentLoop(child, session: session, maxSteps: runtime.maxSteps);
+      provideStory(child, sessionId: session.id);
     },
   );
   try {

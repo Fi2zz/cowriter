@@ -13,6 +13,7 @@ import 'package:conatus_agent/conatus_agent.dart';
 import 'package:conatus_compaction/conatus_compaction.dart';
 import 'package:conatus_core/conatus_core.dart';
 import 'package:conatus_cron/conatus_cron.dart';
+import 'package:conatus_doc/conatus_doc.dart';
 import 'package:conatus_foundation/conatus_foundation.dart';
 import 'package:conatus_llm/conatus_llm.dart';
 import 'package:conatus_mcp/conatus_mcp.dart';
@@ -32,6 +33,7 @@ import '../config/config_writer.dart';
 import '../config/project_data_dir.dart';
 import '../diagnose/doctor.dart';
 import '../hooks/hooks.dart';
+import '../story/story.dart';
 import '../subagent/subagent_progress.dart';
 import '../subagent/swarm_member.dart';
 import '../tools/update_plan.dart';
@@ -741,6 +743,8 @@ class ConatusTuiController implements TuiUserPromptHost {
         await _handleBackground(arg);
       case 'doctor':
         _showDoctor();
+      case 'story':
+        _showStory();
       case 'cost':
         _showCost();
       case 'cron':
@@ -1155,6 +1159,16 @@ class ConatusTuiController implements TuiUserPromptHost {
     }
     buffer.write('\n${failed == 0 ? '未发现阻塞项。' : '发现 $failed 个需处理项（见上）。'}');
     transcript.add(TuiRole.system, buffer.toString());
+  }
+
+  /// `/story`：列出本会话的补丁时间轴（不经模型，只读 `'doc'` 服务）。
+  void _showStory() {
+    final DocEngine? engine = _sessionCtx?.get<DocEngine>('doc');
+    if (engine == null) {
+      transcript.add(TuiRole.system, '故事层不可用：会话未装配 doc 服务。');
+      return;
+    }
+    transcript.add(TuiRole.system, renderStoryTimeline(engine.log.patches));
   }
 
   /// `/goal [子命令]`：管理当前会话的长期目标（不经模型，直接调 Goal 服务）。
@@ -1689,6 +1703,9 @@ class ConatusTuiController implements TuiUserPromptHost {
         telemetry: _app.get<Telemetry>('telemetry'),
       );
       provideTeamTools(child);
+      // 故事层：本会话的编辑补丁引擎（doc 服务）+ 编辑工具观察中间件，
+      // 随会话子上下文卸载撤销。
+      provideStory(child, sessionId: id);
       configureSession?.call(child, session);
     });
     _sessionCtx = ctx;

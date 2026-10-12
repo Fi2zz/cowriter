@@ -169,6 +169,14 @@ export 'src/sandbox/seatbelt_profile.dart'
         buildSeatbeltProfile,
         defaultWritableCaches,
         seatbeltMachAllowlist;
+export 'src/story/story.dart'
+    show
+        StoryRecorder,
+        kStoryToolNames,
+        provideStory,
+        renderStoryTimeline,
+        storyEditedPaths,
+        storyPatchTime;
 export 'src/subagent/subagent_progress.dart'
     show SubAgentLine, SubAgentProgressStore;
 export 'src/subagent/swarm_member.dart'

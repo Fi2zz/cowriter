@@ -70,6 +70,10 @@ const List<TuiCommand> tuiCommands = <TuiCommand>[
   ),
   TuiCommand(name: 'compact', description: '手动压缩当前会话（折叠早期历史）'),
   TuiCommand(
+    name: 'story',
+    description: '故事线：列出本会话的补丁时间轴（人机双写）',
+  ),
+  TuiCommand(
     name: 'rewind',
     description: '回滚工作区到 N 轮前（[N] 缺省 1；list 查看可用检查点）',
     argHint: '[N|list]',
