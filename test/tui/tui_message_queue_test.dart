@@ -13,6 +13,7 @@ import 'package:test/test.dart';
 class _GateProvider implements LlmProvider {
   final Completer<void> gate = Completer<void>();
   final List<String> prompts = <String>[];
+  List<LlmMessage> lastMessages = <LlmMessage>[];
   int calls = 0;
 
   @override
@@ -25,6 +26,7 @@ class _GateProvider implements LlmProvider {
     List<Map<String, dynamic>>? tools,
   }) async {
     prompts.add(messages.last.content);
+    lastMessages = List<LlmMessage>.of(messages);
     calls++;
     if (calls == 1) await gate.future;
     return LlmResult(content: 'reply-$calls', provider: 'gated', model: 'm');
@@ -35,8 +37,7 @@ class _GateProvider implements LlmProvider {
     List<LlmMessage> messages, {
     Map<String, dynamic>? options,
     List<Map<String, dynamic>>? tools,
-  }) =>
-      const Stream<LlmStreamEvent>.empty();
+  }) => const Stream<LlmStreamEvent>.empty();
 
   @override
   void close() {}
@@ -68,9 +69,12 @@ Future<void> _until(bool Function() cond) async {
 }
 
 void main() {
-  test('busy 时入队，收口后依次出队执行', () async {
-    final (ConatusTuiController controller, Context app, _GateProvider provider) =
-        await _build();
+  test('busy 时入队；后续消息经 steering 轮内注入（不等下一轮）', () async {
+    final (
+      ConatusTuiController controller,
+      Context app,
+      _GateProvider provider,
+    ) = await _build();
     addTearDown(app.dispose);
 
     final Future<void> first = controller.handleLine('第一条');
@@ -87,12 +91,21 @@ void main() {
     await first;
     await _until(() => !controller.busy && controller.queuedCount == 0);
 
-    expect(provider.prompts, <String>['第一条', '第二条', '第三条']);
+    // 轮内注入语义：第二条出队起新一轮时，第三条在组请求前被 steering
+    // 注入同一轮——模型一次看到两条，而不是各等一轮。
+    expect(provider.prompts, <String>['第一条', '第三条']);
+    final Iterable<String> users = provider.lastMessages
+        .where((LlmMessage m) => m.role == 'user')
+        .map((LlmMessage m) => m.content);
+    expect(users, containsAllInOrder(<String>['第二条', '第三条']));
   });
 
   test('队列满（20 条）拒绝新输入', () async {
-    final (ConatusTuiController controller, Context app, _GateProvider provider) =
-        await _build();
+    final (
+      ConatusTuiController controller,
+      Context app,
+      _GateProvider provider,
+    ) = await _build();
     addTearDown(app.dispose);
 
     final Future<void> first = controller.handleLine('打头');
@@ -110,8 +123,11 @@ void main() {
   });
 
   test('Esc 打断清空队列并提示条数', () async {
-    final (ConatusTuiController controller, Context app, _GateProvider provider) =
-        await _build();
+    final (
+      ConatusTuiController controller,
+      Context app,
+      _GateProvider provider,
+    ) = await _build();
     addTearDown(app.dispose);
 
     final Future<void> first = controller.handleLine('进行中');
@@ -129,8 +145,11 @@ void main() {
   });
 
   test('切换会话清空队列', () async {
-    final (ConatusTuiController controller, Context app, _GateProvider provider) =
-        await _build();
+    final (
+      ConatusTuiController controller,
+      Context app,
+      _GateProvider provider,
+    ) = await _build();
     addTearDown(app.dispose);
 
     final Future<void> first = controller.handleLine('进行中');
@@ -138,7 +157,9 @@ void main() {
     await controller.handleLine('排队');
     expect(controller.queuedCount, 1);
 
-    await controller.switchSession('session_11111111-2222-3333-4444-555555555555');
+    await controller.switchSession(
+      'session_11111111-2222-3333-4444-555555555555',
+    );
 
     expect(controller.queuedCount, 0);
     provider.gate.complete();
@@ -146,8 +167,11 @@ void main() {
   });
 
   test('空闲时 submit 直接执行不入队', () async {
-    final (ConatusTuiController controller, Context app, _GateProvider provider) =
-        await _build();
+    final (
+      ConatusTuiController controller,
+      Context app,
+      _GateProvider provider,
+    ) = await _build();
     addTearDown(app.dispose);
     provider.gate.complete(); // 放行首轮，避免挂起
 

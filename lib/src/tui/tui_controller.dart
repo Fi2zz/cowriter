@@ -1802,6 +1802,8 @@ class ConatusTuiController implements TuiUserPromptHost {
     // 故在插件回调外 await。
     await provideStory(ctx, sessionId: id, session: session);
     _agent = ctx.agentLoop;
+    // 轮内注入：排队消息不等轮末，Agent Loop 组下一次模型请求前取走注入。
+    _agent?.steering = _takeQueuedForSteering;
     _planMode = ctx.planMode;
     _goal = ctx.goal;
     // 权限模式按会话恢复：每个会话折叠自己的 permission/mode 后缀，
@@ -1908,6 +1910,7 @@ class ConatusTuiController implements TuiUserPromptHost {
       }
     }
     // 消息队列：收口后投递下一条排队输入（一次一条，依次衔接）。
+    // 多数时候队列已被 steering 取空（轮内注入），这里是兜底路径。
     if (_queue.isNotEmpty && !busy) {
       final (String, List<TuiAttachment>) next = _queue.removeAt(0);
       unawaited(submit(next.$1, attachments: next.$2));
@@ -1920,6 +1923,19 @@ class ConatusTuiController implements TuiUserPromptHost {
         transcript.add(TuiRole.system, 'Stop hook 失败：$hookError');
       }
     }
+  }
+
+  /// SteeringSource：取回全部排队消息的文本并清空队列（Agent Loop 在组
+  /// 下一次模型请求前调用——排队消息轮内注入，不等轮末）。取出后刷新
+  /// UI（「已排队 n 条」即时递减）；注入消息的附件 v1 丢弃（插话是纯文本）。
+  Future<List<String>> _takeQueuedForSteering() async {
+    if (_queue.isEmpty) return const <String>[];
+    final List<String> texts = <String>[
+      for (final (String, List<TuiAttachment>) entry in _queue) entry.$1,
+    ];
+    _queue.clear();
+    _refresh();
+    return texts;
   }
 
   /// 调度交付：空闲时把提醒当作一轮用户输入投递，返回是否成功入队。

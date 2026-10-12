@@ -504,6 +504,12 @@ class ConatusTuiRuntime {
             '提议不会直接生效，人审阅后才应用。',
       ),
     );
+    prompt.section(
+      PromptSection(
+        name: 'steering',
+        text: () => '用户可能在你工作途中插话：出现新的用户消息时，优先响应最新要求。',
+      ),
+    );
     // 项目上下文：AGENTS.md / NAVA.md（见 project_context.dart）。注入为
     // `'workdir'` 服务供 `/init` 等命令定位仓库根。
     app.provide('workdir', resolvedWorkdir);
