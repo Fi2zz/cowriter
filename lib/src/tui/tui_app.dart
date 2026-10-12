@@ -470,6 +470,15 @@ class ConatusTuiRuntime {
       ),
     );
     final SessionStore sessions = provideSessions(app);
+    // ── 故事层日志（doc/* 事件）：独立目录持久化，与业务会话 JSONL 互不
+    // 干扰；provideStory 的 DocEngine 缺省取 'sessionLog' 服务，装上后补丁
+    // 落盘、可经 rebuildDocEngine 跨进程重建。
+    provideSessionLog(
+      app,
+      persistence: JsonlSessionPersistence(
+        dir: '$resolvedBaseDir${sep}story-log',
+      ),
+    );
 
     // ── system prompt / 记忆 / 压缩 / 技能 ──────────────────────
     final SystemPrompt prompt = provideSystemPrompt(app);
