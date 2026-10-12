@@ -16,6 +16,7 @@ import 'package:conatus_foundation/conatus_foundation.dart';
 import 'story_notices.dart';
 import 'story_pending.dart';
 import 'story_render.dart';
+import 'story_review.dart';
 import 'story_watcher.dart';
 
 /// 产生故事补丁的编辑工具。
@@ -41,6 +42,10 @@ Future<DocEngine> provideStory(
   String? watchDir,
   Duration pollInterval = const Duration(milliseconds: 500),
   Session? session,
+
+  /// 事前审阅：挂载写工具拦截门（编辑先成待定补丁）。仅交互模式传 true；
+  /// headless 没有人审，保持直写。
+  bool review = false,
 }) async {
   final DocEngine engine = await _restoreEngine(ctx, sessionId);
   ctx.provide('doc', engine);
@@ -49,6 +54,20 @@ Future<DocEngine> provideStory(
     fs: ctx.get<FileSystem>('fs'),
     telemetry: ctx.get<Telemetry>('telemetry'),
   );
+  if (session != null) {
+    final StoryPending pending = StoryPending();
+    ctx.onDispose(bindStoryPending(ctx, session, pending));
+    if (review) {
+      // 审查门必须先于 recorder 注册：先注册者在外层先命中——被拦的调用
+      // 不调 next()，recorder 看不到，自然不会把待定补丁误记为 ai 补丁。
+      final StoryReviewGate gate = StoryReviewGate(
+        pending: pending,
+        fs: ctx.get<FileSystem>('fs'),
+      );
+      ctx.provide('storyReview', gate);
+      ctx.effect(() => gate.mount(ctx.tools));
+    }
+  }
   ctx.effect(() => ctx.tools.use(recorder.observe, tag: 'story'));
   final StoryNotices notices = StoryNotices();
   ctx.provide('storyNotices', notices);
@@ -59,9 +78,6 @@ Future<DocEngine> provideStory(
     pollInterval,
     notices,
   );
-  if (session != null) {
-    ctx.onDispose(bindStoryPending(ctx, session, StoryPending()));
-  }
   return engine;
 }
 

@@ -500,8 +500,9 @@ class ConatusTuiRuntime {
       PromptSection(
         name: 'story-ops',
         text: () =>
-            '除了文件工具，你也可以用 ```ops 围栏块（JSON 数组的块操作）提议修改；'
-            '提议不会直接生效，人审阅后才应用。',
+            '文件编辑（write_file / edit_file / apply_patch）默认进入待定审阅：'
+            '人接受后才真正落盘。收到「已登记为待定补丁」的结果后继续推进或等待，'
+            '不要重试同一编辑。也可以用 ```ops 围栏块（JSON 数组的块操作）提议修改。',
       ),
     );
     prompt.section(

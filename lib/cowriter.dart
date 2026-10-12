@@ -113,6 +113,8 @@ export 'src/config/config_writer.dart'
         writeConfigFile;
 export 'src/config/project_data_dir.dart' show resolveProjectDataDir;
 export 'src/diagnose/doctor.dart' show DoctorCheck, doctorChecks;
+export 'src/diff/apply.dart'
+    show PatchContextException, applyDiffFile, applyEditText;
 export 'src/diff/diff_parse.dart' show parseUnifiedDiff;
 export 'src/diff/diff_types.dart' show DiffFile, DiffHunk, DiffOp, DiffOpKind;
 export 'src/diff/preview.dart' show buildApprovalPreview, kPreviewMaxChars;
@@ -182,6 +184,7 @@ export 'src/story/story_pending.dart'
     show StoryPending, bindStoryPending, renderStoryPending, tryCompileOps;
 export 'src/story/story_render.dart'
     show renderStoryTimeline, storyEditedPaths, storyPatchTime;
+export 'src/story/story_review.dart' show StoryReviewGate, previewEditedOps;
 export 'src/story/story_scan.dart' show kStorySkipDirs, kStoryTextExtensions;
 export 'src/story/story_watcher.dart' show StoryWatcher;
 export 'src/subagent/subagent_progress.dart'

@@ -4,6 +4,12 @@
 
 ## [未发布]
 
+- **事前审阅（pending scope）**：交互模式下 `write_file` / `edit_file` /
+  `apply_patch` 被 `StoryReviewGate` 拦成待定补丁（本地算出执行后内容，
+  不落盘；算不出则 fail-open 放行给真实工具报错），人经 `/story apply`
+  接受生效、`/story reject` 丢弃。中间件链上审查门恒在审批门外层（先注册
+  先命中），写工具不再触发审批弹窗；headless 不拦截。diff 包新增公开
+  `applyDiffFile` / `applyEditText`（与工具同一语义，消除两套实现漂移）。
 - **diff 即反馈闭环**：人在编辑器改文件 → watcher 登记 human 补丁 → 同时
   生成摘要通报（每文件 +/- 行数，不带全文）进 `'storyNotices'` 队列 →
   steering 缝在组下一次模型请求前与排队消息合并注入（通报在前、排队文本

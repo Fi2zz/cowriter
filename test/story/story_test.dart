@@ -223,12 +223,14 @@ void main() {
         if (dir.existsSync()) dir.deleteSync(recursive: true);
       });
       await controller.start();
+      // 交互模式下写工具被事前审阅门拦成待定补丁，apply 后才入故事。
       await app.tools.call(
         const ToolCall(
           name: 'write_file',
           arguments: <String, Object?>{'path': 'story.md', 'content': '第一章'},
         ),
       );
+      await controller.handleLine('/story apply 1');
 
       await controller.handleLine('/story');
 

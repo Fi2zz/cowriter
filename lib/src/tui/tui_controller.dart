@@ -74,7 +74,8 @@ const String kGoalUsage =
 /// `/story` 用法提示。
 const String kStoryUsage =
     '用法：/story（时间轴）| preview <n>（前 n 个补丁时刻）| discard <n>（驳回并写回）|'
-    ' fork <n>（从前 n 个补丁分叉新会话）| pending（待应用）| apply <i>';
+    ' fork <n>（从前 n 个补丁分叉新会话）| pending（待定补丁）| apply <i>（接受）|'
+    ' reject <i>（丢弃）';
 
 /// `/cron` 用法提示。
 const String kCronUsage = '用法：/cron [list|add <内容> <at|every|daily|cron> <规则>|'
@@ -377,6 +378,11 @@ class ConatusTuiController implements TuiUserPromptHost {
   }
 
   /// 按当前模式挂载 / 卸载审批中间件（幂等）。
+  ///
+  /// 事前审阅门不在这里：中间件链**先注册者最外层先命中**（`_chain` 的
+  /// reversed 包裹使早注册的包在最外）。审查门随 provideStory 在 `_bind`
+  /// 挂载（早于本方法的首次执行），且审批门此后每次重挂都是更晚注册，
+  /// 因此审查门恒在审批门外层——写工具先被拦成待定补丁，不触发审批弹窗。
   void _syncPermissionMode() {
     _approvalGate?.call();
     _approvalGate = null;
@@ -1195,12 +1201,18 @@ class ConatusTuiController implements TuiUserPromptHost {
       case 'fork':
         await _forkStory(engine, rest);
       case 'pending':
+        final StoryPending? pending = _storyPending();
         transcript.add(
           TuiRole.system,
-          renderStoryPending(_storyPending()?.patches ?? const <DocPatch>[]),
+          renderStoryPending(
+            pending?.patches ?? const <DocPatch>[],
+            sources: pending?.sources ?? const <String, String>{},
+          ),
         );
       case 'apply':
         await _applyStoryPending(engine, rest);
+      case 'reject':
+        _rejectStoryPending(rest);
       default:
         transcript.add(TuiRole.system, kStoryUsage);
     }
@@ -1261,6 +1273,16 @@ class ConatusTuiController implements TuiUserPromptHost {
     final String text =
         await pending.apply(int.tryParse(rest) ?? -1, engine, _app.get<FileSystem>('fs'));
     transcript.add(TuiRole.system, text);
+  }
+
+  /// `/story reject <i>`：丢弃第 i 个待定补丁（不落盘，文件未改动）。
+  void _rejectStoryPending(String rest) {
+    final StoryPending? pending = _storyPending();
+    if (pending == null) {
+      transcript.add(TuiRole.system, '待应用通道不可用：会话未装配。');
+      return;
+    }
+    transcript.add(TuiRole.system, pending.reject(int.tryParse(rest) ?? -1));
   }
 
   /// `/goal [子命令]`：管理当前会话的长期目标（不经模型，直接调 Goal 服务）。
@@ -1801,7 +1823,7 @@ class ConatusTuiController implements TuiUserPromptHost {
     // 故事层：本会话的编辑补丁引擎（doc 服务）+ 编辑观察中间件 + 人的编辑
     // 监听，随会话子上下文卸载撤销。异步（要从 sessionLog 重建故事线），
     // 故在插件回调外 await。
-    await provideStory(ctx, sessionId: id, session: session);
+    await provideStory(ctx, sessionId: id, session: session, review: true);
     _agent = ctx.agentLoop;
     // 轮内注入：排队消息不等轮末，Agent Loop 组下一次模型请求前取走注入。
     _agent?.steering = _takeQueuedForSteering;

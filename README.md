@@ -189,7 +189,12 @@ busy 时输入框保持可编辑（「思考中」动画在状态栏）：回车
   `discard <n>` 驳回第 n 个补丁并把触及文件写回 fold 后内容（fold 后消失
   的文件保守保留不删）；`fork <n>` 从前 n 个补丁分叉新会话并自动切换
   （会话层 fork 复制事件前缀，切过去后故事线经 rebuild 恢复）；
-  `pending` / `apply <i>` 管理待应用补丁。
+  `pending` / `apply <i>` / `reject <i>` 管理待定补丁。
+- **事前审阅（pending scope）**：交互模式下 `write_file` / `edit_file` /
+  `apply_patch` 不即时落盘——先算出「执行后内容」登记为待定补丁，模型
+  收到「已登记待定」的非错误结果继续推进；人经 `/story apply` 接受才写盘
+  并入故事线，`reject` 丢弃。算不出执行结果的调用（old 串找不到、patch
+  不适用）fail-open 放行给真实工具报错。headless 不拦截（没有人审）。
 - 第二通道：模型除文件工具外，还可用 ```` ```ops ```` 围栏块**提议**修改
   （JSON 数组的块操作）——提议只进会话级的待应用列表（不落盘、不自动
   生效），`/story apply` 审阅应用后才写入文件并 commit 进故事线。

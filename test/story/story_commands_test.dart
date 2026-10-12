@@ -167,8 +167,11 @@ void main() {
         dir.deleteSync(recursive: true);
       });
       await controller.start();
+      // 交互模式下写工具被事前审阅门拦成待定补丁，逐个 apply 入故事。
       await _write(app, 'a.md', '第一章');
+      await controller.handleLine('/story apply 1');
       await _write(app, 'b.md', '第二章');
+      await controller.handleLine('/story apply 1');
       await controller.handleLine('/story');
       expect(controller.transcript.messages.last.text, contains('故事线（2 个补丁）'));
 

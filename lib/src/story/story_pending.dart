@@ -21,26 +21,43 @@ List<PatchOp> tryCompileOps(String text) {
   }
 }
 
-/// 会话级的待应用补丁列表。
+/// 会话级的待应用补丁列表。两个来源：助手回复的 ops 块（[feed]）与
+/// 事前审阅门拦下的写工具调用（[feedOps]，[source] 记工具名）。
 class StoryPending {
   final List<DocPatch> _patches = <DocPatch>[];
+  final Map<String, String> _sources = <String, String>{};
   int _seq = 0;
 
   /// 待应用补丁（追加序）。
   List<DocPatch> get patches => List<DocPatch>.unmodifiable(_patches);
 
+  /// 补丁 id → 来源（工具名或 'ops'）；渲染列表用。
+  Map<String, String> get sources => Map<String, String>.unmodifiable(_sources);
+
   /// 喂入一条助手回复；编译出非空 ops 时存为一个待应用补丁。
   void feed(String text) {
     final List<PatchOp> ops = tryCompileOps(text);
     if (ops.isEmpty) return;
+    feedOps(ops);
+  }
+
+  /// 直接登记一组 ops 为一个待应用补丁，返回其序号（1 起）。
+  int feedOps(List<PatchOp> ops, {String source = 'ops'}) {
     _seq += 1;
-    _patches.add(
-      DocPatch(
-        id: 'pending-${DateTime.now().microsecondsSinceEpoch}-$_seq',
-        author: PatchAuthor.ai,
-        ops: ops,
-      ),
-    );
+    final String id = 'pending-${DateTime.now().microsecondsSinceEpoch}-$_seq';
+    _patches.add(DocPatch(id: id, author: PatchAuthor.ai, ops: ops));
+    _sources[id] = source;
+    return _patches.length;
+  }
+
+  /// 丢弃第 [index] 个（1 起）待应用补丁（pending 是临时态，不落 log）。
+  String reject(int index) {
+    if (index < 1 || index > _patches.length) {
+      return '没有第 $index 个待定补丁（/story pending 查看列表）。';
+    }
+    final DocPatch removed = _patches.removeAt(index - 1);
+    _sources.remove(removed.id);
+    return '已丢弃第 $index 个待定补丁（${removed.ops.length} 个文件未改动）。';
   }
 
   /// 应用第 [index] 个（1 起）：逐 op 经 fs 缝写文件，全部成功后 commit
@@ -81,7 +98,7 @@ class StoryPending {
       };
       await fs.writeText(await fs.resolve(op.blockId), text);
     }
-    _patches.removeAt(index - 1);
+    _sources.remove(_patches.removeAt(index - 1).id);
     await engine.commit(
       DocPatch(
         id: 'story-${DateTime.now().microsecondsSinceEpoch}-a$index',
@@ -93,15 +110,19 @@ class StoryPending {
   }
 }
 
-/// 渲染待应用列表（`/story pending` 输出）。
-String renderStoryPending(List<DocPatch> patches) {
-  if (patches.isEmpty) return '没有待应用补丁。';
-  final StringBuffer buffer = StringBuffer('待应用补丁（${patches.length}）：');
+/// 渲染待应用列表（`/story pending` 输出）：序号 + 来源 + ops 摘要。
+String renderStoryPending(
+  List<DocPatch> patches, {
+  Map<String, String> sources = const <String, String>{},
+}) {
+  if (patches.isEmpty) return '没有待定补丁。';
+  final StringBuffer buffer = StringBuffer('待定补丁（${patches.length}）：');
   for (final (int index, DocPatch patch) in patches.indexed) {
     final String ops = patch.ops
         .map((PatchOp op) => '${op.runtimeType}(${op.blockId})')
         .join(', ');
-    buffer.write('\n  ${index + 1}. $ops');
+    final String source = sources[patch.id] ?? 'ops';
+    buffer.write('\n  ${index + 1}. [$source] $ops');
   }
   return buffer.toString();
 }
