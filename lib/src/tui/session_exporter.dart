@@ -51,7 +51,7 @@ class SessionExport {
   /// 渲染成 markdown。
   String toMarkdown() {
     final StringBuffer buffer = StringBuffer();
-    buffer.writeln('# nava 会话 ${session.id}');
+    buffer.writeln('# cowriter 会话 ${session.id}');
     buffer.writeln();
     buffer.writeln(_header());
     buffer.writeln();
@@ -66,7 +66,7 @@ class SessionExport {
     final String bare = session.id.startsWith('session_')
         ? session.id.substring('session_'.length)
         : session.id;
-    return 'nava-$bare.md';
+    return 'cowriter-$bare.md';
   }
 
   /// 落盘。返回最终绝对路径。

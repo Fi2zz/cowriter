@@ -15,7 +15,7 @@ export 'config_values.dart' show ConfigException;
 
 /// 首次启动写入的配置模板（文件不存在时由 [loadConfig] 初始化）。
 const String kDefaultConfigToml = '''
-# nava 的唯一配置入口（~/.nava_cowriter/config.toml）
+# cowriter 的唯一配置入口（~/.nava_cowriter/config.toml）
 # 兼容 kimi-code-config 格式：顶层 default_model（provider/model）定当前提供商
 # 与默认模型；模型定义放 [models."provider/model"]；提供商放 [providers.<名字>]。
 
@@ -62,7 +62,7 @@ keep = 5                    # 每会话保留最近 N 个检查点（0 = 不限�
 
 # Hooks：工具执行前/后与轮次收口的用户命令（经 /bin/sh -c 直连运行）。
 # [hooks]
-# pre_tool_use = ["echo 将在工具前运行 > /tmp/nava-hook.log"]
+# pre_tool_use = ["echo 将在工具前运行 > /tmp/cowriter-hook.log"]
 # post_tool_use = []
 # stop = []
 

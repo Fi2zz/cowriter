@@ -370,7 +370,7 @@ class GitShadowStore implements CheckpointStore {
       '${Platform.pathSeparator}exclude',
     );
     final String body = <String>[
-      '# nava 检查点影子仓库的排除项（勿手改：每次快照前重写）',
+      '# cowriter 检查点影子仓库的排除项（勿手改：每次快照前重写）',
       for (final String prefix in kCheckpointDefaultIgnores) '$prefix/',
       if (projectRel.isNotEmpty) '${projectRel.replaceAll('\\', '/')}/',
       for (final String prefix in ignore)

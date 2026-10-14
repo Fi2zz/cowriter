@@ -55,7 +55,7 @@ void main() {
     test('带会话头：id / 模型 / 工作目录 / 事件数', () {
       final String md = _export().toMarkdown();
 
-      expect(md, startsWith('# nava 会话 session_abc123'));
+      expect(md, startsWith('# cowriter 会话 session_abc123'));
       expect(md, contains('- 会话：`session_abc123`'));
       expect(md, contains('- 模型：testprov/m1'));
       expect(md, contains('- 工作目录：`/repo/demo`'));
@@ -158,7 +158,7 @@ void main() {
     });
 
     test('缺省文件名去掉 session_ 前缀', () {
-      expect(_export().defaultFileName, 'nava-abc123.md');
+      expect(_export().defaultFileName, 'cowriter-abc123.md');
     });
   });
 
@@ -250,7 +250,7 @@ void main() {
       expect(
         path,
         '${dir.absolute.path}${Platform.pathSeparator}exports'
-        '${Platform.pathSeparator}nava-abc123.md',
+        '${Platform.pathSeparator}cowriter-abc123.md',
       );
       expect(File(path).existsSync(), isTrue);
     });

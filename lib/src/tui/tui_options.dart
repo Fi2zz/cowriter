@@ -13,7 +13,7 @@ bool isValidSessionId(String id) =>
 
 /// 规范会话 id：`session_` + UUID（如 `session_c8898262-4a76-4bd4-93dc-f757fd4ef666`）。
 ///
-/// 只有命中该格式的 id 才可被 `nava --session <id>` 打开/恢复；其余一律视为
+/// 只有命中该格式的 id 才可被 `cowriter --session <id>` 打开/恢复；其余一律视为
 /// 新建会话。
 bool isCanonicalSessionId(String id) => RegExp(
   r'^session_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$',
@@ -71,9 +71,9 @@ class TuiOptions {
 
   /// 用法文案。
   static const String usage =
-      '用法：nava '
+      '用法：cowriter '
       '[--session <id>] [--config <路径>]\n'
-      '       nava -p <任务文本> [--output-format text|json] [--session <id>]\n'
+      '       cowriter -p <任务文本> [--output-format text|json] [--session <id>]\n'
       '  --session <id>   打开/恢复指定会话（缺省新建会话，格式 session_<uuid>）\n'
       '  --config <路径>  配置文件路径（默认 ~/.nava_cowriter/config.toml）\n'
       '  -p, --print <任务>  headless 单轮执行：跑完即退出，不启动 TUI\n'

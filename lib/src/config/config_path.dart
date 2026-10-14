@@ -6,7 +6,7 @@ library;
 import 'dart:io';
 
 /// 用户级配置目录名，放在系统默认位置（macOS 为 `$HOME`）下。
-/// 与 nava 的 `~/.nava_cowriter` 隔离，两个产品互不混数据。
+/// 与 nava（conatus_code）的 `~/.nava` 隔离，两个产品互不混数据。
 const String kConfigDirName = '.nava_cowriter';
 
 /// 配置文件名。

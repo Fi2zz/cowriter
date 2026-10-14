@@ -41,7 +41,7 @@ class _Stub implements LlmProvider {
   void close() {}
 }
 
-/// 按 `bin/conatus_code.dart` 的真实接线装配：fs jail 到工作目录，`fs_jail` 默认为开。
+/// 按 `bin/cowriter.dart` 的真实接线装配：fs jail 到工作目录，`fs_jail` 默认为开。
 Future<ConatusTuiRuntime> _boot(
   Directory dir, {
   List<ModelConfig> models = const <ModelConfig>[],

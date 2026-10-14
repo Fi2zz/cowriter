@@ -10,10 +10,10 @@ pubspec.lock
 # 本地开发用：由 conatus 仓库的 tool/setup_code_filter.sh 生成（见 README）
 pubspec_overrides.yaml
 
-# conatus_code 运行期状态（会话 / 记忆 / 技能 / 快照），与 conatus 仓库根同名约定
+# cowriter 运行期状态（会话 / 记忆 / 技能 / 快照），与 conatus 仓库根同名约定
 .conatus/
 
-# 打包产物：tool/build_binary.sh 生成的 nava 可执行文件（不入库）
+# 打包产物：tool/build_binary.sh 生成的 cowriter 可执行文件（不入库）
 dist/
 
 # Directory created by dartdoc

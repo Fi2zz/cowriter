@@ -1,5 +1,5 @@
 # 本包的 lint 规则自包含（**不**像兄弟包那样 include ../../analysis_options.yaml）：
-# conatus_code 同时是一个可独立 clone 的仓库（见 README「快速开始」），独立
+# cowriter 同时是一个可独立 clone 的仓库（见 README「快速开始」），独立
 # 形态下 ../../analysis_options.yaml 不存在，include 会失败并使整套规则失效。
 # 规则与 conatus 仓库根的 analysis_options.yaml 保持一致；改一处请同步另一处。
 include: package:lints/recommended.yaml
