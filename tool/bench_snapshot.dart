@@ -13,7 +13,7 @@ Future<void> main(List<String> args) async {
   final String sep = Platform.pathSeparator;
   final Directory projectDir = Directory('$root$sep.conatus')
     ..createSync(recursive: true);
-  final Directory scratch = Directory.systemTemp.createTempSync('nava-bench');
+  final Directory scratch = Directory.systemTemp.createTempSync('cowriter-bench');
 
   final (int files, int bytes) = await _measure(root, sep);
   stdout.writeln('工作区：$root');

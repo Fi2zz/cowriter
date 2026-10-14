@@ -27,7 +27,7 @@ void main() {
     final String expectedLeaf = Uri.encodeComponent(
       work.resolveSymbolicLinksSync(),
     );
-    expect(dir, '${home.path}/.nava_cowriter/projects/$expectedLeaf');
+    expect(dir, '${home.path}/.cowriter/projects/$expectedLeaf');
     expect(Directory(work.path).listSync(), isEmpty);
   });
 

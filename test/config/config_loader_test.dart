@@ -43,7 +43,7 @@ void _expectConfigError(String fragment, void Function() body) {
 
 void main() {
   test('常量：目录名、文件名、环境变量名', () {
-    expect(kConfigDirName, '.nava_cowriter');
+    expect(kConfigDirName, '.cowriter');
     expect(kConfigFileName, 'config.toml');
     expect(kConfigHomeEnv, 'COWRITER_HOME');
   });

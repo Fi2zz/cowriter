@@ -1,4 +1,4 @@
-/// 项目上下文：AGENTS.md / NAVA.md 的读取、拼接与截断。
+/// 项目上下文：AGENTS.md / COWRITER.md 的读取、拼接与截断。
 library;
 
 import 'dart:io';
@@ -34,17 +34,17 @@ void main() {
     expect(context, '构建：dart test');
   });
 
-  test('只有 NAVA.md → 原样返回', () async {
+  test('只有 COWRITER.md → 原样返回', () async {
     final String? context = await loadProjectContext(
-      _dirWith(<String, String>{'NAVA.md': '本仓库专属约定'}),
+      _dirWith(<String, String>{'COWRITER.md': '本仓库专属约定'}),
     );
 
     expect(context, '本仓库专属约定');
   });
 
-  test('并存 → AGENTS.md 在前、NAVA.md 在后、空行分隔', () async {
+  test('并存 → AGENTS.md 在前、COWRITER.md 在后、空行分隔', () async {
     final String? context = await loadProjectContext(
-      _dirWith(<String, String>{'AGENTS.md': 'A 内容', 'NAVA.md': 'N 内容'}),
+      _dirWith(<String, String>{'AGENTS.md': 'A 内容', 'COWRITER.md': 'N 内容'}),
     );
 
     expect(context, 'A 内容\n\nN 内容');
@@ -99,7 +99,7 @@ void main() {
     File(secret).writeAsStringSync('PRIVATE KEY');
     Link('${dir.path}${Platform.pathSeparator}AGENTS.md').createSync(secret);
     File(
-      '${dir.path}${Platform.pathSeparator}NAVA.md',
+      '${dir.path}${Platform.pathSeparator}COWRITER.md',
     ).writeAsStringSync('本仓库约定');
 
     expect(await loadProjectContext(dir.path), '本仓库约定');

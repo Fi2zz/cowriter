@@ -2,11 +2,19 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
-> 本仓库 fork 自终端编码智能体 `conatus_code`（nava），产品方向转为
-> **人机双写协同写作**。下面 `[未发布]` 段是分叉点前后的连续历史：靠后的
-> 条目（E-* 编号、检查点 / 沙箱 / headless 等）来自上游 conatus_code。
+> cowriter 是 fork 自终端编码智能体 conatus_code 的新产品，版本线从 `0.1.0`
+> 重新开始。`[0.1.0]` 一节覆盖分叉点前后的连续开发；`[0.15.0]` 及以前是上游
+> conatus_code 的历史。
 
-## [未发布]
+## [0.1.0] — 2026-10-14
+
+- **契约品牌化（破坏性）**：配置目录 `~/.nava_cowriter` → `~/.cowriter`
+  （`COWRITER_HOME` 仍可覆盖）；工作区数据目录（工具结果溢出等）
+  `.nava_cowriter` → `.cowriter`；hook 注入的环境变量 `NAVA_HOOK_*` →
+  `COWRITER_HOOK_*`；项目上下文文件 `NAVA.md` → `COWRITER.md`；编译期版本键
+  `NAVA_VERSION` → `COWRITER_VERSION`。**升级需迁移**：把旧
+  `~/.nava_cowriter/`（配置 / 会话 / 检查点）重命名为 `~/.cowriter/`；依赖旧
+  `NAVA_HOOK_*` 环境变量或 `NAVA.md` 的脚本与仓库需同步改名。
 
 - **文档品牌化重写**：README 从 nava（终端编码智能体）改为 cowriter 定位
   ——「是什么」重写为文档即会话 / 编辑即对话 / 故事即历史；快速开始 / 打包 /
@@ -20,8 +28,7 @@
   会话头与缺省文件名、配置模板的 hook 示例路径、检查点影子仓库的排除项
   注释与提交身份（`cowriter@localhost`）；`docs/plugin-integration.md`、
   `.gitignore`、`analysis_options.yaml`、`lib/{tui,fs_tools}.dart` 头注释同步。
-  保留的 `nava` 系标识只有运行时契约：`~/.nava_cowriter` 配置目录、
-  `COWRITER_HOME`、`NAVA_HOOK_*` 环境变量、`NAVA_VERSION` 编译期键。
+  （运行时契约标识的改名见上一条「契约品牌化」。）
 - 修正 README 两处与实现不符的描述：检查点内置排除项（`.conatus` 已不在
   默认排除集，实为 `build` / `.dart_tool` / `node_modules` 顶层 + 任意层级
   `.git` + `project_dir` 整树）；`[agent] project_dir` 示例值改用 `.cowriter`

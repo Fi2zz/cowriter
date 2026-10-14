@@ -12,7 +12,7 @@ cowriter 把「和 AI 一起写东西」当成两个人对**同一份文档**的
 
 它不是「能帮你改文件的聊天机器人」。在聊天范式里，改文件是聊天的副作用；在这里，编辑就是交互的原语：AI 提议一个补丁、你接受或驳回、你手动改一处 AI 下一轮就能看见。两个作者，一种原语（补丁），一个产物（故事）。
 
-cowriter 从终端编码智能体 fork 而来，保留了不少面向代码仓库的能力——`rg` 检索、项目上下文（`AGENTS.md`）、lint-on-edit、检查点。它们对「写东西」同样有用：搜资料、查引用、交付前跑一遍校验。
+cowriter 从终端编码智能体 fork 而来，保留了不少面向代码仓库的能力——`rg` 检索、项目上下文（`AGENTS.md` / `COWRITER.md`）、lint-on-edit、检查点。它们对「写东西」同样有用：搜资料、查引用、交付前跑一遍校验。
 
 > 完整范式推演见 conatus 根仓 `docs/人机双写范式设计文档.md`。**本包落地的是该范式的薄实现**：
 > 补丁时间轴、事前审阅、diff 即反馈、人的编辑入故事、`/rewind` 回滚。锚点批注、supersede、
@@ -47,7 +47,7 @@ dart run bin/cowriter.dart
 启动它，而不是在 cowriter 源码目录里。在别处启动时用 `--config` 指向配置，或在
 config.toml 里设 `[agent] workdir = "/你的/文稿/目录"`。
 
-首次运行会在 `~/.nava_cowriter/config.toml` 生成配置模板，并弹出 provider 面板引导你添加模型（见[配置](#配置)）。
+首次运行会在 `~/.cowriter/config.toml` 生成配置模板，并弹出 provider 面板引导你添加模型（见[配置](#配置)）。
 
 ## 打包成可执行文件
 
@@ -76,7 +76,7 @@ export PATH="$PWD/dist:$PATH"
 
 ## 配置
 
-首次运行会读取 `~/.nava_cowriter/config.toml`（`COWRITER_HOME` / `--config` 可覆盖路径）。
+首次运行会读取 `~/.cowriter/config.toml`（`COWRITER_HOME` / `--config` 可覆盖路径）。
 **文件不存在时自动生成模板，并弹出 provider 面板引导添加**（会话内 `/provider`
 也可随时新增，写回 config.toml）。自动生成的模板很精简；下面是常用配置项的全貌：
 
@@ -111,7 +111,7 @@ max_steps = 8                 # 单轮最大模型步数
 workdir = "/path/to/project"  # 工作目录（沙箱根）；缺省当前目录
 # subagent_permission = "inherit"  # 子代理默认权限：inherit/readonly/ask/auto（模型只能收紧）
 # project_dir = ".cowriter"   # 项目数据目录（会话/记忆/数据库/检查点）；缺省不放工作区，
-                              # 落 ~/.nava_cowriter/projects/<编码工作区路径>；显式设置才
+                              # 落 ~/.cowriter/projects/<编码工作区路径>；显式设置才
                               # 相对工作目录（旧行为，工作区会出现该目录；勿用 `.conatus`，
                               # 那是框架的技能发现根）
 
@@ -268,7 +268,7 @@ git 式 marker 的双版本合并文本，**人的版本在上、AI 待定内容
 每轮收口后对工作区文件做快照：**turn 0 全量 base + 各轮相对 base 的差量**
 （只打包变化/新增文件，删除记入清单），**每个检查点压缩成单个无扩展名归档
 文件**（`<项目数据目录>/checkpoints/<会话>/<sha256 哈希名>`**——项目数据目录
-缺省是 `~/.nava_cowriter/projects/<编码工作区路径>`（不在工作区建目录），**文件名不可读、
+缺省是 `~/.cowriter/projects/<编码工作区路径>`（不在工作区建目录），**文件名不可读、
 无 `.gz` 扩展名、不暴露轮次时间线**，轮次只记录在归档头与会话级 gzip `index`
 里；内容非明文、不保留目录结构；`dart:io` 内置 GZipCodec 自定义容器格式，零新
 依赖；旧版目录树检查点读时兼容、索引缺失自动重建）。清单记录快照时刻的对话
@@ -386,7 +386,7 @@ OS Error: Path does not exist, path = 'lib/…/nope.dart'
 config.toml `[hooks]` 表：`pre_tool_use`（任一非零退出即拒绝该工具）、
 `post_tool_use`（失败追加提示）、`stop`（轮次收口，失败只提示）。hook 命令
 经 `/bin/sh -c` 直连运行（**不走** `'shell'` 沙箱缝）；注入环境变量
-`NAVA_HOOK_EVENT` / `NAVA_HOOK_TOOL` / `NAVA_HOOK_ARGS_JSON`。
+`COWRITER_HOOK_EVENT` / `COWRITER_HOOK_TOOL` / `COWRITER_HOOK_ARGS_JSON`。
 
 ```toml
 [hooks]
@@ -411,7 +411,7 @@ pre_tool_use = ["echo 工具前钩子 >> /tmp/cowriter-hook.log"]
 
 ## 模型提供商（`/provider` / `/model`）
 
-提供商在 `~/.nava_cowriter/config.toml` 的 `[providers.<名字>]` 表里定义
+提供商在 `~/.cowriter/config.toml` 的 `[providers.<名字>]` 表里定义
 （实现 `lib/src/providers/`，公开入口 `lib/providers.dart`）；`[llm]
 default_model = "provider/model"` 同时定当前提供商与默认模型。
 

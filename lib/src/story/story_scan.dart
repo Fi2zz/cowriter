@@ -6,7 +6,7 @@ import 'dart:io';
 /// 扫描时跳过的目录（按 basename），与 GlobTool / ListFilesTool 对齐。
 const Set<String> kStorySkipDirs = <String>{
   '.git',
-  '.nava_cowriter',
+  '.cowriter',
   'node_modules',
   '.dart_tool',
   'build',

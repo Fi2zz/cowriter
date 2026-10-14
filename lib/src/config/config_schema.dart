@@ -1,4 +1,4 @@
-/// cowriter 的配置模型，对应 `~/.nava_cowriter/config.toml`。
+/// cowriter 的配置模型，对应 `~/.cowriter/config.toml`。
 library;
 
 import 'package:conatus_llm/conatus_llm.dart';

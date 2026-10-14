@@ -15,12 +15,12 @@ Future<void> main(List<String> args) async {
   final int fileCount = args.isEmpty ? 2000 : int.parse(args.first);
   final int fileKb = args.length < 2 ? 64 : int.parse(args[1]);
 
-  final Directory ws = Directory.systemTemp.createTempSync('nava-bench-ws');
+  final Directory ws = Directory.systemTemp.createTempSync('cowriter-bench-ws');
   final Directory shadowData = Directory.systemTemp.createTempSync(
-    'nava-bench-git',
+    'cowriter-bench-git',
   );
   final Directory archData = Directory.systemTemp.createTempSync(
-    'nava-bench-arch',
+    'cowriter-bench-arch',
   );
   final String root = ws.path;
 

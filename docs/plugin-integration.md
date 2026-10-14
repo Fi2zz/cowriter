@@ -155,13 +155,13 @@ config.toml 的 `[mcp.servers.*]`——形状等价但格式不同。支持直�
 
 ```toml
 [hooks]
-pre_tool_use = ["node ~/.nava_cowriter/hooks/check-env.cjs"]
+pre_tool_use = ["node ~/.cowriter/hooks/check-env.cjs"]
 post_tool_use = []
 stop = []
 ```
 
-hook 收到环境变量 `NAVA_HOOK_EVENT` / `NAVA_HOOK_TOOL` /
-`NAVA_HOOK_ARGS_JSON`；pre 任一非零退出即拒绝该工具。
+hook 收到环境变量 `COWRITER_HOOK_EVENT` / `COWRITER_HOOK_TOOL` /
+`COWRITER_HOOK_ARGS_JSON`；pre 任一非零退出即拒绝该工具。
 
 **注意**：hook 是**直连 shell、不经沙箱**的本机命令——它的权限等于运行 cowriter
 的用户本人。只挂你信任的脚本。
@@ -177,7 +177,7 @@ Claude Code 的 `settings.json` hooks 是带 matcher 的结构化 JSON，与 cow
 插件作者完全无感。用官方 SDK 一个文件就够：
 
 ```js
-// ~/.nava_cowriter/wrappers/thing/server.mjs
+// ~/.cowriter/wrappers/thing/server.mjs
 // 依赖：npm i @modelcontextprotocol/sdk some-js-library
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/internals/stdio.js";
@@ -203,7 +203,7 @@ config 里指向这个壳：
 [mcp.servers.thing]
 type = "stdio"
 command = "node"
-args = ["/home/you/.nava_cowriter/wrappers/thing/server.mjs"]
+args = ["/home/you/.cowriter/wrappers/thing/server.mjs"]
 ```
 
 适配壳是一次性成本，在你这边；对 cowriter 来说它只是一个普通的 MCP server。

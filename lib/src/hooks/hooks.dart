@@ -3,7 +3,7 @@
 /// 事件：`pre_tool_use`（任一失败即拒绝工具）/ `post_tool_use`（失败只追加
 /// 提示）/ `stop`（轮次收口，失败只提示）。hook 命令经 `/bin/sh -c` 直连起
 /// 进程（**不经过 `'shell'` 缝**，避免沙箱递归裁决用户本机命令）。环境变量：
-/// `NAVA_HOOK_EVENT` / `NAVA_HOOK_TOOL` / `NAVA_HOOK_ARGS_JSON`。
+/// `COWRITER_HOOK_EVENT` / `COWRITER_HOOK_TOOL` / `COWRITER_HOOK_ARGS_JSON`。
 library;
 
 import 'dart:convert';
@@ -42,7 +42,7 @@ Future<List<HookResult>> runHooks(
       final ProcessResult result = await Process.run(
         '/bin/sh',
         <String>['-c', command],
-        environment: <String, String>{'NAVA_HOOK_EVENT': event, ...env},
+        environment: <String, String>{'COWRITER_HOOK_EVENT': event, ...env},
       );
       results.add(HookResult(
         exitCode: result.exitCode,
@@ -91,8 +91,8 @@ class Hooks {
       commands,
       event,
       env: <String, String>{
-        'NAVA_HOOK_TOOL': call.name,
-        'NAVA_HOOK_ARGS_JSON': jsonEncode(call.arguments),
+        'COWRITER_HOOK_TOOL': call.name,
+        'COWRITER_HOOK_ARGS_JSON': jsonEncode(call.arguments),
       },
     );
     return _firstFailureOf(results);

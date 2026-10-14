@@ -32,13 +32,13 @@ void main() {
     expect(results.single.exitCode, 127);
   });
 
-  test('环境变量注入 NAVA_HOOK_EVENT/TOOL/ARGS_JSON', () async {
+  test('环境变量注入 COWRITER_HOOK_EVENT/TOOL/ARGS_JSON', () async {
     final Directory dir = Directory.systemTemp.createTempSync('nava-hooks');
     addTearDown(() => dir.deleteSync(recursive: true));
     final String out = '${dir.path}${Platform.pathSeparator}out.txt';
     final Hooks hooks = Hooks(config: HooksConfig(preToolUse: <String>[
-      'printf "%s|%s|%s" "\$NAVA_HOOK_EVENT" "\$NAVA_HOOK_TOOL" '
-          '"\$NAVA_HOOK_ARGS_JSON" > $out',
+      'printf "%s|%s|%s" "\$COWRITER_HOOK_EVENT" "\$COWRITER_HOOK_TOOL" '
+          '"\$COWRITER_HOOK_ARGS_JSON" > $out',
     ]));
 
     final String? denial = await hooks.preToolUse(

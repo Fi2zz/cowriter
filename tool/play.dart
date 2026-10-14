@@ -25,7 +25,7 @@ Future<void> main(List<String> args) async {
   final String root = Directory(args[1]).absolute.path;
   _guard(root);
   final String cmd = args.first;
-  final String dataDir = args.length > 2 ? args[2] : '/tmp/nava-play-data';
+  final String dataDir = args.length > 2 ? args[2] : '/tmp/cowriter-play-data';
   final String session = args.length > 3 ? args[3] : 's1';
   final int turn = args.length > 4 ? int.parse(args[4]) : 0;
 
@@ -59,7 +59,7 @@ GitShadowStore openStore(String root, String dataDir) =>
 
 /// 勘察：conatus 口径 vs git 口径，各收哪些文件。
 Future<void> survey(String root) async {
-  const String projectRel = 'nava-probe'; // 探测用，不匹配任何真实路径
+  const String projectRel = 'cowriter-probe'; // 探测用，不匹配任何真实路径
   final List<String> conatus = <String>[];
   int bytes = 0;
   await for (final FileSystemEntity e in checkpointWalk(

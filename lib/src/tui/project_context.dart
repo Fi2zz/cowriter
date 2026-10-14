@@ -1,9 +1,9 @@
-/// 项目上下文文件（`AGENTS.md` / `NAVA.md`）的读取与拼接。
+/// 项目上下文文件（`AGENTS.md` / `COWRITER.md`）的读取与拼接。
 ///
-/// v1 只读工作目录**根**的两个文件（不做向上递归）。读取前对文件与工作区根
+/// 只读工作目录**根**的两个文件（不向上递归）。读取前对文件与工作区根
 /// 各取 canonical 路径并校验包含关系：**符号链接指向工作区外时一律不读**。
 /// 为什么必须校验：克隆一个不可信仓库，里面放一个
-/// `AGENTS.md -> ~/.nava_cowriter/config.toml`（或 `-> ~/.ssh/id_rsa`）的符号链接，
+/// `AGENTS.md -> ~/.cowriter/config.toml`（或 `-> ~/.ssh/id_rsa`）的符号链接，
 /// `File.readAsString` 会跟随它把外部文件内容拼进 system prompt，随首轮请求
 /// 发给远端模型——`dart:io` 直读不过 fs jail，符号链接就是越过 jail 的那道门。
 library;
@@ -13,10 +13,10 @@ import 'dart:io';
 /// 单个上下文文件的最大字符数；超限截断并标注。
 const int kProjectContextMaxChars = 16384;
 
-/// 读 `<workdir>/AGENTS.md` 与 `<workdir>/NAVA.md` 拼成一段项目上下文；
+/// 读 `<workdir>/AGENTS.md` 与 `<workdir>/COWRITER.md` 拼成一段项目上下文；
 /// 两文件都不存在（或都读不出内容）返回 `null`。
 ///
-/// 顺序：AGENTS.md 在前、NAVA.md 在后，中间空行分隔；每个文件超
+/// 顺序：AGENTS.md 在前、COWRITER.md 在后，中间空行分隔；每个文件超
 /// [kProjectContextMaxChars] 截断并附标注。文件读取失败按空处理；工作区根
 /// 无法解析（如目录不存在）时也按「无上下文」返回 `null`。
 Future<String?> loadProjectContext(String workdir) async {
@@ -24,15 +24,15 @@ Future<String?> loadProjectContext(String workdir) async {
   if (root == null) return null;
   final String sep = Platform.pathSeparator;
   final String agents = await _readTrimmed('$workdir${sep}AGENTS.md', root);
-  final String nava = await _readTrimmed('$workdir${sep}NAVA.md', root);
-  if (agents.isEmpty && nava.isEmpty) return null;
+  final String product = await _readTrimmed('$workdir${sep}COWRITER.md', root);
+  if (agents.isEmpty && product.isEmpty) return null;
   final StringBuffer buffer = StringBuffer();
   if (agents.isNotEmpty) {
     buffer.write(agents);
   }
-  if (nava.isNotEmpty) {
+  if (product.isNotEmpty) {
     if (agents.isNotEmpty) buffer.write('\n\n');
-    buffer.write(nava);
+    buffer.write(product);
   }
   return buffer.toString();
 }

@@ -1,4 +1,4 @@
-/// 配置文件位置解析：`~/.nava_cowriter/config.toml`。
+/// 配置文件位置解析：`~/.cowriter/config.toml`。
 ///
 /// 覆盖顺序（后者优先）：系统默认位置 → [kConfigHomeEnv] → `--config` 参数。
 library;
@@ -7,7 +7,7 @@ import 'dart:io';
 
 /// 用户级配置目录名，放在系统默认位置（macOS 为 `$HOME`）下。
 /// 与 nava（conatus_code）的 `~/.nava` 隔离，两个产品互不混数据。
-const String kConfigDirName = '.nava_cowriter';
+const String kConfigDirName = '.cowriter';
 
 /// 配置文件名。
 const String kConfigFileName = 'config.toml';

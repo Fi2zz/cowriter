@@ -167,10 +167,10 @@ void main() {
       expect(
         resolveExportPath(
           projectDataDir: '/data/proj',
-          fileName: 'nava-1.md',
+          fileName: 'cowriter-1.md',
         ),
         '${Platform.pathSeparator}data${Platform.pathSeparator}proj'
-            '${Platform.pathSeparator}exports${Platform.pathSeparator}nava-1.md',
+            '${Platform.pathSeparator}exports${Platform.pathSeparator}cowriter-1.md',
       );
     });
 
@@ -179,7 +179,7 @@ void main() {
         resolveExportPath(
           target: '/tmp/out.md',
           projectDataDir: '/data',
-          fileName: 'nava-1.md',
+          fileName: 'cowriter-1.md',
         ),
         '/tmp/out.md',
       );
@@ -190,7 +190,7 @@ void main() {
         resolveExportPath(
           target: '~/notes/out.md',
           projectDataDir: '/data',
-          fileName: 'nava-1.md',
+          fileName: 'cowriter-1.md',
           env: <String, String>{'HOME': '/home/me'},
         ),
         '${Platform.pathSeparator}home${Platform.pathSeparator}me'
@@ -203,10 +203,10 @@ void main() {
         resolveExportPath(
           target: '/tmp/dir/',
           projectDataDir: '/data',
-          fileName: 'nava-1.md',
+          fileName: 'cowriter-1.md',
         ),
         '${Platform.pathSeparator}tmp${Platform.pathSeparator}dir'
-            '${Platform.pathSeparator}nava-1.md',
+            '${Platform.pathSeparator}cowriter-1.md',
       );
     });
 
@@ -242,7 +242,7 @@ void main() {
     });
 
     // 缺省落点是 <projectDataDir>/exports/。真实运行里 projectDataDir 由
-    // resolveProjectDataDir 解析成 ~/.nava_cowriter/projects/<编码工作区>（那条不变量由
+    // resolveProjectDataDir 解析成 ~/.cowriter/projects/<编码工作区>（那条不变量由
     // project_data_dir_test 守），所以导出不会落进用户的代码仓库。
     test('缺省落点是 <projectDataDir>/exports/', () async {
       final String path = await _export().write(projectDataDir: dir.path);

@@ -16,7 +16,7 @@ output="${1:-$package_root/dist/cowriter}"
 mkdir -p "$(dirname "$output")"
 version="$(grep '^version:' "$package_root/pubspec.yaml" | awk '{print $2}')"
 dart compile exe "$package_root/bin/cowriter.dart" \
-  -DNAVA_VERSION="$version" -o "$output"
+  -DCOWRITER_VERSION="$version" -o "$output"
 chmod +x "$output"
 
 echo "产物：${output}（$(du -h "$output" | awk '{print $1}')）"

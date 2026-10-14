@@ -11,9 +11,9 @@ library;
 import 'dart:io';
 
 /// cowriter 在工作目录内使用的目录名（与 nava 的 `.nava` 隔离）。
-const String kCowriterProjectDirName = '.nava_cowriter';
+const String kCowriterProjectDirName = '.cowriter';
 
-/// 工具结果溢出目录：`<workdir>/.nava_cowriter/tool-results`。
+/// 工具结果溢出目录：`<workdir>/.cowriter/tool-results`。
 String toolResultSpillDir(String workdir) {
   final String sep = Platform.pathSeparator;
   return '$workdir$sep$kCowriterProjectDirName${sep}tool-results';
