@@ -1,33 +1,53 @@
-# Nava
+# cowriter
 
-> A terminal coding agent built on the conatus runtime.
+> 终端人机双写协同写作 Agent，基于 [conatus](https://github.com/Fi2zz/conatus) 运行时。
 
 ## 是什么
 
-基于 [conatus](https://github.com/Fi2zz/conatus) 构建的终端编码智能体。
-复用 conatus 的 Agent Loop、工具系统、技能沉淀，
-专注 coding 场景。
+cowriter 把「和 AI 一起写东西」当成两个人对**同一份文档**的协同编辑，而不是一问一答的聊天：
+
+- **文档即会话**：产出是文件本身，不是聊天记录。
+- **编辑即对话**：AI 不靠「说」表达意图，靠对文件打补丁；你直接改文件，也是一等事件。
+- **故事即历史**：每个会话就是你和 AI 的编辑故事——补丁只追加，可回顾、可回退、可分叉。
+
+它不是「能帮你改文件的聊天机器人」。在聊天范式里，改文件是聊天的副作用；在这里，编辑就是交互的原语：AI 提议一个补丁、你接受或驳回、你手动改一处 AI 下一轮就能看见。两个作者，一种原语（补丁），一个产物（故事）。
+
+cowriter 从终端编码智能体 fork 而来，保留了不少面向代码仓库的能力——`rg` 检索、项目上下文（`AGENTS.md`）、lint-on-edit、检查点。它们对「写东西」同样有用：搜资料、查引用、交付前跑一遍校验。
+
+> 完整范式推演见 conatus 根仓 `docs/人机双写范式设计文档.md`。**本包落地的是该范式的薄实现**：
+> 补丁时间轴、事前审阅、diff 即反馈、人的编辑入故事、`/rewind` 回滚。锚点批注、supersede、
+> prompt 即补丁、patch 级 traveling 等尚未实现，见「[人机双写故事层](#人机双写故事层)」的已知边界。
 
 ## 特性
 
-- 🖥️ 终端交互（内置 TUI，入口 `lib/tui.dart`）
-- 🔍 文件读写与搜索（read_file / write_file / edit_file / rg / glob）
-- 🧠 技能沉淀（重复轨迹自动抽象为可复用工具）
-- 🤝 多智能体协作（任务板 + 成员运行时）
-- 🔒 审批与沙箱（高危操作走审批；默认 Seatbelt 进程沙箱 + 文件 jail）
-- 🗺️ 计划闭环（plan_write 建计划、update_plan 执行中推进、计划面板实时渲染）
-- 🩹 失败自愈（工具失败自动反思重试，可按需重规划）
-- ⏱️ 预算护栏（每轮墙钟 + 上下文 token 估算 + 成本跟踪）
+- 📜 **故事层（人机双写）**：编辑即补丁、事前审阅、diff 即反馈、`/story` 时间轴与分叉
+- ⏪ **检查点与回滚**：每轮快照工作区，`/rewind` 连文件带对话一起回退
+- 🖥️ **终端交互**：内置 TUI，斜杠命令、会话面板、计划面板、团队泳道
+- 🔍 **文件读写与搜索**：read_file / write_file / edit_file / rg / glob / list_files / apply_patch
+- 🧠 **技能与记忆**：反复出现的工具序列可沉淀为命名技能；`/remember` 直记；`/cron` 定时任务
+- 🤝 **子 Agent 与团队**：`spawn_agent` 隔离委托；成员泳道实时总览
+- 🔒 **审批与沙箱**：高危操作走审批；默认 Seatbelt 进程沙箱 + 文件 jail
+- 🗺️ **计划闭环**：plan_write 建计划、update_plan 执行中推进、计划面板实时渲染
+- 🩹 **失败自愈**：工具失败自动反思重试，可按需重规划
+- ⏱️ **预算护栏**：每轮墙钟 + 上下文 token 估算 + 成本跟踪
+- 🌐 **接入面**：OpenAI 兼容提供商、MCP server、hooks、技能包
 
 ## 快速开始
 
+需要先装 [Dart SDK](https://dart.dev/get-dart) 3.6+（`dart --version` 确认）。从源码运行：
+
 ```bash
-# 从源码运行
-git clone https://github.com/Fi2zz/conatus_code.git
-cd conatus_code
+git clone https://github.com/Fi2zz/cowriter.git
+cd cowriter
 dart pub get
-dart run bin/conatus_code.dart
+dart run bin/cowriter.dart
 ```
+
+**工作目录**：cowriter 把「当前目录」当作工作区（沙箱根）——要在你的文稿目录里
+启动它，而不是在 cowriter 源码目录里。在别处启动时用 `--config` 指向配置，或在
+config.toml 里设 `[agent] workdir = "/你的/文稿/目录"`。
+
+首次运行会在 `~/.nava_cowriter/config.toml` 生成配置模板，并弹出 provider 面板引导你添加模型（见[配置](#配置)）。
 
 ## 打包成可执行文件
 
@@ -35,20 +55,20 @@ dart run bin/conatus_code.dart
 bash tool/build_binary.sh
 ```
 
-产出 `dist/nava`（自包含：内嵌 Dart runtime，目标机器不需要装 Dart SDK）。
+产出 `dist/cowriter`（自包含：内嵌 Dart runtime，目标机器不需要装 Dart SDK）。
 装到 PATH 的两种方式：
 
 ```bash
 # 1. 软链到 PATH 上的目录
-ln -s "$PWD/dist/nava" /usr/local/bin/nava
+ln -s "$PWD/dist/cowriter" /usr/local/bin/cowriter
 
 # 2. 或把 dist/ 加进 PATH
 export PATH="$PWD/dist:$PATH"
 ```
 
-之后直接 `nava` 启动，`nava --help` 看用法。脚本默认写到
-`<包根>/dist/nava`；第一个参数可覆盖输出路径，例如把产物写到
-`/tmp/nava`。
+之后直接 `cowriter` 启动，`cowriter --help` 看用法。脚本默认写到
+`<包根>/dist/cowriter`；第一个参数可覆盖输出路径，例如把产物写到
+`/tmp/cowriter`。
 
 注意：OS 沙箱后端（launcher）仍在运行时从 pub 缓存定位，换机器或清理 pub
 缓存后沙箱会 fail-closed（命令执行被禁用，文件 jail 保留），这与源码运行
@@ -58,23 +78,28 @@ export PATH="$PWD/dist:$PATH"
 
 首次运行会读取 `~/.nava_cowriter/config.toml`（`COWRITER_HOME` / `--config` 可覆盖路径）。
 **文件不存在时自动生成模板，并弹出 provider 面板引导添加**（会话内 `/provider`
-也可随时新增，写回 config.toml）。示例：
+也可随时新增，写回 config.toml）。自动生成的模板很精简；下面是常用配置项的全貌：
 
 ```toml
 [credentials]
 ARK_API_KEY = "sk-..."        # 非模型 Key 也放这里（TAVILY_API_KEY 等）
 
 [llm]
-default_model = "arkcli-agent-plan/doubao-seed-2-0-lite-260215"   # provider/model
-# fallback_models = ["deepseek/deepseek-chat"]                    # 回退链（按序）
+default_model = "ark/doubao-seed-1-8-251228"   # provider/model
+# fallback_models = ["deepseek/deepseek-chat"]  # 回退链（按序）
 # max_attempts = 4            # 单个提供商总尝试次数（含首次）；1 = 关闭重试
 # retry_base_ms = 500         # 首次退避，此后按 2 的幂翻倍
 # retry_max_ms = 30000        # 单次退避上限（Retry-After 也受此约束）
 
-[providers.arkcli-agent-plan]
+[providers.ark]
 api_key = "ark-..."
-base_url = "https://ark.cn-beijing.volces.com/api/plan/v3"
+base_url = "https://ark.cn-beijing.volces.com/api/v3"   # 方舟普通端点
 type = "openai"
+
+# 可选：给 `/model` 浮层预置候选清单（不配则从 models.dev 拉取该 provider 的清单）
+# [models."ark/doubao-seed-1-8-251228"]
+# capabilities = ["tool_use"]
+# max_context_size = 256000
 
 [providers.deepseek]
 api_key = "sk-..."
@@ -85,9 +110,10 @@ type = "openai"
 max_steps = 8                 # 单轮最大模型步数
 workdir = "/path/to/project"  # 工作目录（沙箱根）；缺省当前目录
 # subagent_permission = "inherit"  # 子代理默认权限：inherit/readonly/ask/auto（模型只能收紧）
-# project_dir = ".conatus"    # 项目数据目录（会话/记忆/数据库/检查点）；缺省不放工作区，
+# project_dir = ".cowriter"   # 项目数据目录（会话/记忆/数据库/检查点）；缺省不放工作区，
                               # 落 ~/.nava_cowriter/projects/<编码工作区路径>；显式设置才
-                              # 相对工作目录（旧行为，工作区会出现该目录）
+                              # 相对工作目录（旧行为，工作区会出现该目录；勿用 `.conatus`，
+                              # 那是框架的技能发现根）
 
 [approval]
 mode = "ask_when_needed"      # always_ask / ask_when_needed / never_ask
@@ -110,8 +136,8 @@ max_turn_tokens = 200000      # 单轮上下文 token 估算上限；0 = 不限
 [checkpoint]
 enabled = true                # 每轮收口后对工作区做文件快照（/rewind 回滚）
 keep = 5                      # 回滚点数（含 turn 0 全量 base；0 = 不限）
-# ignore = ["app/build"]      # 额外忽略的相对路径前缀（内置已排 .git / .conatus /
-                              # build / .dart_tool / node_modules 等可再生目录）
+# ignore = ["app/build"]      # 额外忽略的相对路径前缀（内置已排 build / .dart_tool /
+                              # node_modules 顶层前缀、任意层级的 .git、project_dir 整树）
 
 [background]
 # keep_alive_on_exit = false  # true = 退出时不杀后台任务（脱离 /background 管理）
@@ -128,6 +154,115 @@ keep = 5                      # 回滚点数（含 turn 0 全量 base；0 = 不�
 # headers = { Authorization = "Bearer ${REMOTE_TOKEN}" }
 ```
 
+## 人机双写故事层
+
+故事层是 cowriter 与普通「能改文件的 Agent」的分界。它把每次编辑记成一条**补丁**，
+并让 AI 与人共用同一条编辑历史。
+
+### 块与补丁
+
+- **块 = 段落**：文件按空行切段，每个段落是一个块，块 id 为
+  `路径#<内容 sha1 前 8 位>`（同文件重复段落加 `-2`/`-3` 后缀）。超过 512 段的
+  文件整体退化为 `路径#full` 单块（LCS 对齐是 O(n·m)，超长文件的段落级故事也没有可读性）。
+- **一次成功的编辑 = 一个补丁**：`write_file` / `edit_file` / `apply_patch` 的**成功**
+  结果各产生一条补丁（作者＝AI）；失败的工具调用不记。跨文件的 `apply_patch` 是
+  「一个补丁含多个 op」。
+- **修改 = 删除旧段 + 插入新段**：两段文字之间的差异由 LCS 对齐如实记为
+  remove + insert，不虚构成 replace。
+- **补丁随会话装配**：装配了 `sessionLog` 服务时每次提交同步落 `doc/patch` 会话事件，
+  重启后用 `rebuildDocEngine` 从事件流重建整条故事线。
+
+### 一轮协同怎么走
+
+```
+你：把这段开头改得更直接一些
+AI：（调用 edit_file）→ 被审阅门拦下，登记为待定补丁，不落盘
+    结果回给模型「编辑已登记为待定补丁 #1（1 个文件），待人审阅生效」
+你：/story pending         ← 看待定补丁列表
+你：/story apply 1         ← 接受，写盘并入故事线
+    或 /story reject 1     ← 丢弃，文件原样不动
+```
+
+AI 不会因为「没写进去」就重试——它收到的是「已登记」，可以继续推进或等你审阅。
+
+### 三条入故事的通道
+
+1. **AI 工具编辑（受事前审阅）**：交互模式下 `write_file` / `edit_file` / `apply_patch`
+   不即时落盘——先算出「执行后的内容」登记为待定补丁，你经 `/story apply` 接受才写盘。
+   算不出执行结果的调用（`edit_file` 的 old 串找不到、patch 上下文不适用、参数不全）
+   **fail-open 放行**给真实工具报错——拦一个注定失败的编辑只会把真实错误藏起来。
+   headless 不拦截（没有人审，文件必须真写）。
+2. **人的编辑（轮询 + 内容归因）**：你在编辑器里直接改工作目录下的文件，watcher 轮询
+   （缺省 500ms，轮询间隔本身即防抖窗）把它登记为 **human 补丁**。归因靠内容对比：
+   磁盘内容与引擎 fold 一致 → 是 AI 自己写的（apply 后已在盘上），跳过；不一致 → 人改的。
+   AI 尚未 apply 的待定补丁不在盘上，由 pending 通道持有，不参与这里比对。
+3. **`ops` 围栏块提议（第二通道）**：模型除文件工具外，还可以用 ```` ```ops ```` 围栏块
+   提议修改（JSON 数组的块操作）。提议只进会话级待定列表（不落盘、不自动生效），
+   同样经 `/story apply` 审阅应用。
+
+### 该用哪个命令
+
+- **丢掉还没落盘的改动** → `/story reject <n>`（待定列表里的第 n 个；文件未改动）。
+- **回退已经入时间轴的改动** → `/story discard <n>`（时间轴里的第 n 个；会写回文件）。
+
+### diff 即反馈
+
+人改文件的同时，watcher 生成一条**摘要通报**（每文件 `+N/-M` 行数，不带全文），
+经 steering 缝在 AI 组下一次模型请求前注入会话——AI 工作途中就能看到你改了哪些文件、
+改了多少，需要细节自己 `read_file`。AI 的写入、`/story discard` 的写回、待定补丁的
+apply 写回都经内容归因，不会误报成「人改了」。
+
+> 为什么不带全文：通报是**提示**不是**任务**。对齐工具结果驱逐的「预览 + 路径」哲学，
+> 需要细节让模型自己去读，避免把整段正文灌进上下文。
+
+### `/story` 子命令
+
+`preview` / `discard` / `fork` 取**时间轴序号**（`/story` 列表里的 1、2、3）；`apply` /
+`reject` 取**待定序号**（`/story pending` 列表里的 1、2、3）。两套编号各自独立，
+别混用。
+
+| 子命令 | 作用 |
+|--------|------|
+| `/story` | 补丁时间轴：序号、作者（人/AI）、补丁 id、涉及文件、落定时间 |
+| `/story preview <n>` | 预览前 n 个补丁时刻的文档状态（段落重组后逐文件列出） |
+| `/story discard <n>` | 驳回第 n 个补丁并**把触及文件写回 fold 后内容**；fold 后消失的文件保守保留不删 |
+| `/story fork <n>` | 从前 n 个补丁分叉新会话并自动切换（会话层 fork 复制事件前缀，切过去后故事线经 rebuild 恢复） |
+| `/story pending` | 列出待定补丁（序号 + 来源 + ops 摘要） |
+| `/story apply <i>` | 接受第 i 个待定补丁：写盘并入故事线 |
+| `/story reject <i>` | 丢弃第 i 个待定补丁（不落盘，文件未改动） |
+
+### 冲突：双版本落盘
+
+待定补丁登记时会记下每个目标文件的**基底内容**。`apply` 时若磁盘内容已不等于基底
+（你在等待期间又改了那个文件），cowriter 不会覆盖、也不会静默失败——它写一份
+git 式 marker 的双版本合并文本，**人的版本在上、AI 待定内容在下**，等你人工合并。
+干净的文件照常写入，一次 apply 只落一条补丁。
+
+### 与 `/rewind` 的分工
+
+故事层管**文档内**的补丁历史（段落粒度、以编辑为单位）；`/rewind` 管**工作区级**的
+时间回溯（文件快照 + 对话回滚，见[检查点与回滚](#检查点与回滚rewind)）。两者是不同
+粒度、不同用途的两层：`/story` 回答「这段文字是怎么变成现在这样的」，`/rewind` 回答
+「把整个工作区退回三轮前」。
+
+### 已知边界（v1）
+
+- **文件删除不记 human 补丁**：watcher 只处理「mtime 变新且内容不一致」的文件，删除
+  留待与回溯语义一起设计。
+- **`apply` 只支持 Insert / Replace**：含 Remove / Move 块的待定补丁 v1 拒绝应用
+  （提示手动处理后驳回）。
+- **不做分支间自动合并**：`/story fork` 出的分支是草稿线，合并靠人主导的三方对照编辑
+  ——散文语义的冲突没有可靠的自动解。
+- **旧会话的文件粒度块不迁移**：早期会话的补丁块 id 是整路径（无 `#`），与新的段落块
+  共存不冲突，但不重写。
+- **故事层未持久化时不能 fork**：没有 `sessionLog` 服务时 `/story fork` 会提示不可用。
+- **事前审阅没有独立开关**：交互模式下写工具一律先登记待定补丁；`headless`（`-p`）
+  直写不拦截。要「改完立刻落盘」目前只能在 headless 下跑。
+- 范式设计里的**锚点批注、supersede、prompt 即补丁、patch 级 traveling 尚未实现**——
+  本包是薄接入，不是完整范式。
+
+> 完整命令清单、键盘快捷键、配置速查与排查表见 [docs/使用指南.md](docs/使用指南.md)。
+
 ## 检查点与回滚（`/rewind`）
 
 每轮收口后对工作区文件做快照：**turn 0 全量 base + 各轮相对 base 的差量**
@@ -143,8 +278,8 @@ keep = 5                      # 回滚点数（含 turn 0 全量 base；0 = 不�
 dart:io，不受 fs jail 约束；`/rewind` 是用户命令，不挂审批。
 
 - 快照时机：会话绑定（turn 0）+ 每轮收口后；保留 base + 最近 `keep-1` 个差量。
-- 排除：内置 `.git` / `.conatus` / `build` / `.dart_tool` / `node_modules`
-  （顶层前缀），外加 `[checkpoint] ignore` 用户配置；读写全程流式
+- 排除：内置 `build` / `.dart_tool` / `node_modules`（顶层前缀）、任意层级的
+  `.git`、以及 `project_dir` 整树，外加 `[checkpoint] ignore` 用户配置；读写全程流式
   （清单头单独读、条目按 chunk 过 gzip），大工作区快照内存 ≈ 最大单文件。
 - 恢复语义：base 铺底 + 差量覆盖/删除 + 删当前多余（rsync 式）。
 - 变化检测：相对 base 的 mtime+size + SHA-256 哈希（stat 相同也兜底）。
@@ -157,7 +292,7 @@ dart:io，不受 fs jail 约束；`/rewind` 是用户命令，不挂审批。
 `list_background_tasks` / `background_output` / `background_kill` 管理之。
 `/background [list|output <id>|kill <id>]` 是用户侧入口。任务走 `'shell'` 缝的
 `start()`，照常受沙箱 CommandPolicy 裁决；并发上限读 `[background]
-max_running_tasks`（缺省 4）。缺省 `keep_alive_on_exit = false`：nava 退出时
+max_running_tasks`（缺省 4）。缺省 `keep_alive_on_exit = false`：cowriter 退出时
 终止所有在跑任务；置 `true` 则退出时不杀、任务保活脱离——**脱离后不再受
 `/background` 管理**（list/output/kill 找不到它），且输出管道随进程退出关闭，
 子进程继续大量写输出可能被 SIGPIPE 杀死。
@@ -176,42 +311,7 @@ busy 时输入框保持可编辑（「思考中」动画在状态栏）：回车
 - `/doctor`：体检——配置 / 提供商 / 回退链 / 模型窗口与费率 / 沙箱（Layer 1/2）/
   工具表 / MCP / rg 逐项 ✓/✗ + 修复提示，自查用。
 
-## 故事层（人机双写）
-
-基于 conatus_doc 的文档补丁引擎，把文件编辑映射为补丁：**一次成功的
-`write_file` / `edit_file` / `apply_patch` = 一个补丁**（`author: ai`，
-`apply_patch` 多文件时一个补丁含多个 op）；块 = **段落**（按空行切段，
-块 id = `路径#<sha1 前 8>`，旧会话的文件粒度块共存不迁移），入故事的
-ops 由段落同步器按 LCS 对齐生成（修改 = 旧段 remove + 新段 insert）。
-失败的工具调用不记；读回新内容失败时降级为空文本并记 telemetry
-（`story.record_failed`），不影响工具调用本身。
-
-- `/story`：列出本会话的补丁时间轴——序号、作者（人/AI）、补丁 id、涉及
-  文件、落定时间。子命令：`preview <n>` 预览前 n 个补丁时刻的文档状态；
-  `discard <n>` 驳回第 n 个补丁并把触及文件写回 fold 后内容（fold 后消失
-  的文件保守保留不删）；`fork <n>` 从前 n 个补丁分叉新会话并自动切换
-  （会话层 fork 复制事件前缀，切过去后故事线经 rebuild 恢复）；
-  `pending` / `apply <i>` / `reject <i>` 管理待定补丁。
-- **事前审阅（pending scope）**：交互模式下 `write_file` / `edit_file` /
-  `apply_patch` 不即时落盘——先算出「执行后内容」登记为待定补丁，模型
-  收到「已登记待定」的非错误结果继续推进；人经 `/story apply` 接受才写盘
-  并入故事线，`reject` 丢弃。算不出执行结果的调用（old 串找不到、patch
-  不适用）fail-open 放行给真实工具报错。headless 不拦截（没有人审）。
-- 第二通道：模型除文件工具外，还可用 ```` ```ops ```` 围栏块**提议**修改
-  （JSON 数组的块操作）——提议只进会话级的待应用列表（不落盘、不自动
-  生效），`/story apply` 审阅应用后才写入文件并 commit 进故事线。
-- 人在编辑器里直接改文件也会入故事：工作目录轮询（mtime + 长度快照）把
-  与引擎状态不一致的改动登记为 human 补丁，间隔即防抖窗。**diff 即反馈**：
-  人改文件同时生成摘要通报（每文件 +/- 行数，不带全文），经 steering 缝
-  在 AI 组下一次模型请求前注入会话——AI 工作途中即可感知，需要细节自己
-  read_file。
-- 补丁随会话子上下文装配（TUI 与 headless 都生效）；装配了 `sessionLog`
-  服务时每次提交同步落 `doc/patch` 会话事件，可用 `rebuildDocEngine` 从
-  事件流重建整条故事线。
-- 人的编辑与 AI 补丁同权：引擎同时接受 `PatchAuthor.human` 补丁（见
-  conatus_doc 与根仓 `docs/人机双写范式设计文档.md`）。
-
-### `/trace` 复盘
+## `/trace` 复盘
 
 ```
 你 › 把 checkpoint 的存储后端加上 git 选项
@@ -224,8 +324,8 @@ ops 由段落同步器按 LCS 对齐生成（修改 = 旧段 remove + 新段 ins
 回答「模型当时看到了什么、为什么那么判断」——屏上只有结论，复盘给的是过程。
 `/trace` 渲染最近一轮，`/trace 3` 看最近三轮。
 
-会话日志本来就是可读 JSONL、事件也全都在盘上，**缺的不是数据而是能看的入口**，
-所以这里不新建埋点，只把 `Session.events` 摊成时间线：
+不新建埋点：会话日志本就是可读 JSONL、事件都在盘上，`/trace` 只把
+`Session.events` 摊成时间线：
 
 - 失败项标 `✗` 并带出原因——模型为什么停下、哪一步炸了
 - 工具结果只取首行但**报出总行数**：`rg` 命中 12 处和 1 处是不同的信息，
@@ -235,16 +335,16 @@ ops 由段落同步器按 LCS 对齐生成（修改 = 旧段 remove + 新段 ins
 
 `/doctor` 查的是**装配**（配置、沙箱、工具表）；`/trace` 查的是**这一轮发生了什么**。
 
-### `/export` 导出
+## `/export` 导出
 
 `/export [路径]` 把当前会话导出为 markdown —— 存档、贴给同事、喂给别的工具
 分析。缺省落在项目数据目录的 `exports/`，给路径则照写（支持 `~` 展开）。
 
 ```
-# nava 会话 session_abc123
+# cowriter 会话 session_abc123
 
 - 会话：`session_abc123`
-- 模型：ark/doubao-seed-2-0-lite
+- 模型：ark/doubao-seed-1-8-251228
 - 工作目录：`/Users/fitz/REPO/conatus`
 - 事件：42 条
 - 成本：$0.0873（models.dev 口径，非账单）
@@ -290,7 +390,7 @@ config.toml `[hooks]` 表：`pre_tool_use`（任一非零退出即拒绝该工�
 
 ```toml
 [hooks]
-pre_tool_use = ["echo 工具前钩子 >> /tmp/nava-hook.log"]
+pre_tool_use = ["echo 工具前钩子 >> /tmp/cowriter-hook.log"]
 # post_tool_use = []
 # stop = []
 ```
@@ -346,7 +446,7 @@ currentName: ..., credentials: ...)` 把注册表挂到 `'providers'` 服务，
   `EnvCredentials`）。
 
 ```dart
-import 'package:conatus_code/providers.dart';
+import 'package:cowriter/providers.dart';
 
 final ProviderRegistry registry = provideProviders(
   app,
@@ -361,10 +461,12 @@ final ProviderRegistry registry = provideProviders(
 final LlmProvider? llm = registry.buildLlm('ark', model: 'doubao-seed-1-8-251228');
 ```
 
-**Plan 端点只认订阅后生成的专属 Key**：`ark-agent-plan` 用
-`ARK_AGENT_PLAN_API_KEY`、`volcengine-coding-plan` 用
-`ARK_CODING_PLAN_API_KEY`，普通方舟 Key（`ARK_API_KEY`）对 plan 端点
-会返回 401。
+**Plan 端点只认订阅后生成的专属 Key**：`provider` 名与 `base_url` 由你自定，例如
+订阅方舟 Agent Plan 就写 `[providers.arkcli-agent-plan]` + `base_url =
+".../api/plan/v3"`，它的 Key 是订阅后生成的专属 Key（如
+`ARK_AGENT_PLAN_API_KEY`）；普通方舟 Key（`ARK_API_KEY`）打 plan 端点会返回 401。
+内置预设 `volcengine-coding-plan`（`.../api/coding/v3`）同理，对应
+`ARK_CODING_PLAN_API_KEY`。
 
 ## LLM 韧性（重试 / 退避 / 回退链）
 
@@ -394,7 +496,7 @@ final LlmProvider? llm = registry.buildLlm('ark', model: 'doubao-seed-1-8-251228
 
 ```toml
 [llm]
-default_model = "arkcli-agent-plan/doubao-seed-2-0-lite-260215"
+default_model = "ark/doubao-seed-1-8-251228"
 fallback_models = ["deepseek/deepseek-chat", "openai/gpt-4o-mini"]
 max_attempts = 4
 ```
@@ -479,12 +581,11 @@ token 额度——否则它那十几轮调用会把**主**轮次撞爆 `max_turn
 - 任务板在泳道之后（没有任务时不渲染）。
 - 状态栏显示团队人数 / 任务完成数 / 成本（成本取共用的 costTracker 真实费率）。
 
-**已知边界**：泳道视图是**独占**的——切过去就没有对话区。若要「边看边聊」需要改
-布局，那不是本次动的范围。
+**已知边界**：泳道视图是**独占**的——切过去就没有对话区，不能「边看边聊」。
 
 ## headless（`-p`）与安全姿态
 
-`nava -p <任务>` 跑**无人值守的单轮**：装配完整运行时（工具 / 沙箱 / MCP /
+`cowriter -p <任务>` 跑**无人值守的单轮**：装配完整运行时（工具 / 沙箱 / MCP /
 预算）但不启动 TUI，输出回复即退出（`--output-format text|json`）。
 
 **为什么不装审批链**：审批需要一个能应答的人——`AskUserApproval` 依赖 TUI
@@ -537,8 +638,8 @@ jail 继续生效。Layer 1 与 Layer 2 可独立关闭；`preset = "danger_full
   `[sandbox] enabled = false` 关闭 Layer 2，保留 Layer 1 文件 jail）。
 - 沙箱定位是防 LLM 乱跑命令的**护栏**：写默认限定在工作区 + 缓存目录，网络
   默认拒绝，读不限面（与 Codex / Claude Code 同姿态）；对抗决心攻击者不是其目标。
-- mach-lookup 白名单是维护点：个别工具若因缺服务报错，按报错扩展
-  `seatbeltMachAllowlist` 即可（TLS 所需的 trustd/ocspd 已内置）。
+- mach-lookup 白名单按需扩展：工具若因缺系统服务报错，把服务名加进
+  `seatbeltMachAllowlist`（TLS 所需的 trustd/ocspd 已内置）。
 - CommandPolicy 的 REVIEW 已接线人工复核：TUI 内经选项浮层征询（NeverAsk
   视同放行），批准后在 seatbelt 内照常执行；headless 无浮层，REVIEW 仍按
   拒绝处理（fail-closed）。白名单/路径越界这类确定性违规不受复核豁免，
@@ -548,24 +649,25 @@ jail 继续生效。Layer 1 与 Layer 2 可独立关闭；`preset = "danger_full
 
 ## 预算护栏
 
-每轮（空闲 2 分钟视为新一轮）默认 10 分钟墙钟 + 上下文 token 护栏；
+一轮 = 你的一次提交到模型收口（空闲 2 分钟自动划分新一轮）；一轮内模型每循环
+一次算一步（一次模型请求 + 工具执行），步数上限是 `[agent] max_steps`。
+
+每轮默认 10 分钟墙钟 + 上下文 token 护栏；
 超限时模型收到收口提示而非直接报错。估算按约 4 字符 1 token 的粗口径
 （`estimateMessagesTokens`），**只作护栏，不用于计费**。
 
 **token 封顶跟模型窗口走**：已知窗口时取 `窗口 × 0.75`（余下 1/4 留给模型
-输出与工具回填）与 `[budget] max_turn_tokens` 的较小者。此前是一个写死的
-20 万——32k 窗口的模型永远等不到这条闸门（请求会先被 API 拒掉），1M 窗口的
-模型又在 20% 处过早收口。窗口来自 models.dev（见下）。
+输出与工具回填）与 `[budget] max_turn_tokens` 的较小者。只看固定阈值会让
+32k 窗口的模型等不到这条闸门（请求先被 API 拒掉），1M 窗口的模型又过早收口。
+窗口来自 models.dev（见下）。
 
 ## 成本与上下文窗口（models.dev）
 
-models.dev 提供的**上下文窗口**与**真实单价**此前只用来填 `/model` 浮层的
-候选表，两项都被丢掉。现由 `ModelProfileStore` 收成一份可查档案：
+`ModelProfileStore` 把 models.dev 的上下文窗口与真实单价收成一份可查档案，
+供 `/cost` 与状态栏使用：
 
 - **`/cost`**：按当前模型的真实费率算，输入/输出/缓存命中 token 分列，并
-  讲清费率来源。**费率查不到就明说「未知」并按 0 计**——此前用的是两条写死
-  的常数（$0.3/M in、$1.2/M out），对 DeepSeek 差一个量级、对 Gemini 差得
-  更多，而用户看不出那个数字是编的。
+  讲清费率来源。**费率查不到就明说「未知」并按 0 计**——不猜一个假数字。
 - **状态栏 `ctx`**：分母是真实窗口。有一轮真实用量后，分子也换成接口返回的
   `prompt_tokens`（正是下一次请求要发的全部内容，含 system prompt、工具定义
   与工具结果），比按屏上记录 chars/4 猜准得多；首轮之前没有真实数据时前缀加
@@ -582,7 +684,7 @@ models.dev 提供的**上下文窗口**与**真实单价**此前只用来填 `/m
 `dart pub get` 即可。
 
 在 [conatus](https://github.com/Fi2zz/conatus) 仓库内开发时，本仓库作为
-submodule 挂在 `packages/conatus_code`。该仓库的 `tool/setup_code_filter.sh`
+submodule 挂在 `packages/cowriter`。该仓库的 `tool/setup_code_filter.sh`
 会：
 
 - 装一个 git clean/smudge filter，让 `pubspec.yaml` 里的 `resolution:
@@ -597,6 +699,10 @@ submodule 挂在 `packages/conatus_code`。该仓库的 `tool/setup_code_filter.
 未装 filter 的 clone（例如直接 clone 本仓库）拿到的是注释态、且 override
 原样生效，行为与上面「独立使用」一致。
 
+**开发 conatus 侧的改动时**：改完在 `packages/cowriter` 下跑
+`bash tool/build_binary.sh` 重建 `dist/cowriter`；只改源码不重建、或交付旧
+二进制，视为改动未完成。
+
 ## 依赖
 
 - [conatus](https://github.com/Fi2zz/conatus) — 框架
@@ -604,11 +710,17 @@ submodule 挂在 `packages/conatus_code`。该仓库的 `tool/setup_code_filter.
 
 ## 与 conatus 的关系
 
-conatus_code 是 conatus 的**上层应用**，不是框架的一部分。框架提供 Agent
-Loop、工具系统、技能沉淀等底座；coding 相关能力（终端 UI、文件工具、代码
-执行）原为 `conatus_tui` / `conatus_fs_tools` / `conatus_coding` 三个独立包，
-**现已并入本包**，入口分别为 `lib/tui.dart` / `lib/fs_tools.dart` /
-`lib/coding.dart`。本包负责装配这些能力并暴露终端界面。
+cowriter 是 conatus 的**上层应用**，不是框架的一部分；fork 自终端编码智能体
+conatus_code，产品方向转为**人机双写协同写作**。相对上游的差异：
+
+- **编码工具面已剥离**：`git_*` / `run_command` / `run_tests` / `run_code` 工具与
+  `/commit` / `/review` 命令已移除；模型侧保留文件读写、搜索、`apply_patch`、
+  后台任务等通用工具面。
+- **接入故事层**：基于 conatus_doc 的文档补丁引擎，把文件编辑映射为补丁（见
+  [人机双写故事层](#人机双写故事层)）。
+- 框架侧（Agent Loop、工具系统、技能沉淀、会话、MCP、沙箱缝）原样复用；TUI、
+  文件工具、提供商注册表原为 conatus 的独立包，现并入本包，入口分别为
+  `lib/tui.dart` / `lib/fs_tools.dart` / `lib/providers.dart`。
 
 ## CI
 

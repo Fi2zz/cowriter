@@ -2,7 +2,32 @@
 
 本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+> 本仓库 fork 自终端编码智能体 `conatus_code`（nava），产品方向转为
+> **人机双写协同写作**。下面 `[未发布]` 段是分叉点前后的连续历史：靠后的
+> 条目（E-* 编号、检查点 / 沙箱 / headless 等）来自上游 conatus_code。
+
 ## [未发布]
+
+- **文档品牌化重写**：README 从 nava（终端编码智能体）改为 cowriter 定位
+  ——「是什么」重写为文档即会话 / 编辑即对话 / 故事即历史；快速开始 / 打包 /
+  代码示例改为 `bin/cowriter.dart` / `dist/cowriter` / `package:cowriter/...`；
+  删去已剥离的编码工具叙事；新增「人机双写故事层」章（块与补丁 / 一轮协同 /
+  三条入故事通道 / diff 即反馈 / `/story` 子命令 / 冲突双版本 / 与 `/rewind`
+  分工 / v1 已知边界），并注明本包落地的是范式**薄实现**。
+- 新增 `docs/使用指南.md`：斜杠命令总表、键盘快捷键、人机双写工作流、
+  配置速查、headless 与安全姿态、排查表。
+- **源码文案品牌清扫**（`nava` → `cowriter`）：`--help` 用法文案、`/export`
+  会话头与缺省文件名、配置模板的 hook 示例路径、检查点影子仓库的排除项
+  注释与提交身份（`cowriter@localhost`）；`docs/plugin-integration.md`、
+  `.gitignore`、`analysis_options.yaml`、`lib/{tui,fs_tools}.dart` 头注释同步。
+  保留的 `nava` 系标识只有运行时契约：`~/.nava_cowriter` 配置目录、
+  `COWRITER_HOME`、`NAVA_HOOK_*` 环境变量、`NAVA_VERSION` 编译期键。
+- 修正 README 两处与实现不符的描述：检查点内置排除项（`.conatus` 已不在
+  默认排除集，实为 `build` / `.dart_tool` / `node_modules` 顶层 + 任意层级
+  `.git` + `project_dir` 整树）；`[agent] project_dir` 示例值改用 `.cowriter`
+  并注明勿用 `.conatus`（框架技能发现根）。
+- 修正 `config_path.dart` / `spill_dir.dart` 注释里「与 nava 的
+  `~/.nava_cowriter` 隔离」的自相矛盾（nava 用的是 `~/.nava`）。
 
 - **故事层块粒度细化到段落**：入故事的 DocPatch ops 由段落同步器
   （`story_sync.dart`，段落按空行切分、LCS 对齐、修改 = remove + insert
