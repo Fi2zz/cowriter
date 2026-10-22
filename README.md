@@ -1,3 +1,18 @@
+> **已归档（2026-10-22）**：本项目已并入 [nava（conatus_code）](https://github.com/Fi2zz/conatus_code)，不再接受改动。
+>
+> **为什么归档**：两个产品源自同一 fork，约 4 万行代码有 95% 重合；每修一个 bug、
+> 加一个功能都要改两遍并手工镜像提交，维护成本已经高于保留两个仓库的收益。决定收敛为
+> 单一产品 nava，把 cowriter 独有的能力并入后归档。
+>
+> **增量去哪了**：故事层（编辑即补丁、事前审阅、`/story` 时间轴）、轮内 steering
+> （排队消息在下一请求边界注入）与 diff 应用纯函数面已移植到 nava，合并范围见
+> nava 提交 `12e3e18..94ad665`；故事层在 nava 里以 `[story] enabled` 保留，**默认关闭**。
+>
+> **迁移**：`~/.cowriter/config.toml` → `~/.nava/config.toml`（配置格式一致）；
+> 会话与 `story-log` 目录照原样搬到 nava 的项目数据目录
+> （`~/.nava/projects/<工作区路径>/`）；`COWRITER.md` → `NAVA.md`。
+> 问题请提到 [conatus 仓库](https://github.com/Fi2zz/conatus/issues)。
+
 # cowriter
 
 > 终端人机双写协同写作 Agent，基于 [conatus](https://github.com/Fi2zz/conatus) 运行时。
